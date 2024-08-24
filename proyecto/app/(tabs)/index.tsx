@@ -1,7 +1,9 @@
-// index.tsx (antes SnakeGame.tsx)
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Platform } from 'react-native';
 import { saveHighScore } from './scoreService';
+import { signInWithGoogle, signOutUser } from './authService'; // Importamos las funciones de autenticación
+import { auth } from '../../firebaseConfig'; // No necesitamos importar `User` desde aquí
+import { onAuthStateChanged, User } from 'firebase/auth'; // Importamos `User` desde `firebase/auth`
 
 const windowWidth = Dimensions.get('window').width;
 const isMobile = Platform.OS !== 'web' || windowWidth < 800;
@@ -28,6 +30,15 @@ export default function SnakeGame() {
   const [isGameOver, setIsGameOver] = useState(false);
   const [score, setScore] = useState(0);
   const [recordSaved, setRecordSaved] = useState(false);
+  const [user, setUser] = useState<User | null>(null); // Estado correctamente tipado
+
+  // Observa el cambio de autenticación
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(moveSnake, 200);
@@ -36,13 +47,13 @@ export default function SnakeGame() {
 
   useEffect(() => {
     if (isGameOver && !recordSaved) {
-      saveHighScore(score).then((updatedScores) => {
+      saveHighScore(score, user).then((updatedScores) => {
         // Puedes hacer algo aquí con updatedScores si es necesario
         console.log('Puntuaciones actualizadas:', updatedScores);
       });
       setRecordSaved(true);
     }
-  }, [isGameOver, recordSaved]);
+  }, [isGameOver, recordSaved, user, score]);
 
   useEffect(() => {
     if (isGameOver) return;
@@ -141,6 +152,21 @@ export default function SnakeGame() {
   return (
     <View style={styles.container}>
       <Text style={styles.scoreText}>Score: {score}</Text>
+
+      {/* Botones para autenticación */}
+      {user ? (
+        <>
+          <Text style={styles.welcomeText}>Bienvenido, {user.displayName}</Text> {/* Aseguramos que `user` esté definido */}
+          <TouchableOpacity onPress={signOutUser} style={styles.button}>
+            <Text style={styles.buttonText}>Cerrar sesión</Text>
+          </TouchableOpacity>
+        </>
+      ) : (
+        <TouchableOpacity onPress={signInWithGoogle} style={styles.button}>
+          <Text style={styles.buttonText}>Iniciar sesión con Google</Text>
+        </TouchableOpacity>
+      )}
+
       <View style={styles.grid}>
         {Array.from({ length: GRID_SIZE * GRID_SIZE }).map((_, index) => {
           const x = index % GRID_SIZE;
@@ -226,6 +252,11 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 24,
     color: 'white',
+  },
+  welcomeText: {
+    fontSize: 18,
+    color: 'white',
+    marginBottom: 10,
   },
   controls: {
     marginTop: 30,
