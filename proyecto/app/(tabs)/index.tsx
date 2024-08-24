@@ -1,15 +1,7 @@
+// index.tsx (antes SnakeGame.tsx)
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Platform } from 'react-native';
 import { saveHighScore } from './scoreService';
-
-interface HighScore {
-  score: number;
-  date: Date;
-}
-
-interface SnakeGameProps {
-  onGameOver: (scores: HighScore[]) => void; // Ajuste del tipo
-}
 
 const windowWidth = Dimensions.get('window').width;
 const isMobile = Platform.OS !== 'web' || windowWidth < 800;
@@ -18,6 +10,10 @@ const CELL_SIZE = isMobile ? Math.floor(windowWidth / GRID_SIZE) : Math.min(30, 
 const INITIAL_SNAKE = [{ x: Math.floor(GRID_SIZE / 2), y: Math.floor(GRID_SIZE / 2) }];
 const INITIAL_FOOD = { x: Math.floor(Math.random() * GRID_SIZE), y: Math.floor(Math.random() * GRID_SIZE) };
 
+/**
+ * Elimina la dependencia de onGameOver y maneja los puntajes internamente.
+ */
+
 enum Direction {
   Up,
   Down,
@@ -25,7 +21,7 @@ enum Direction {
   Right,
 }
 
-export default function SnakeGame({ onGameOver }: SnakeGameProps) {
+export default function SnakeGame() {
   const [snake, setSnake] = useState(INITIAL_SNAKE);
   const [food, setFood] = useState(INITIAL_FOOD);
   const [direction, setDirection] = useState<Direction>(Direction.Right);
@@ -41,7 +37,8 @@ export default function SnakeGame({ onGameOver }: SnakeGameProps) {
   useEffect(() => {
     if (isGameOver && !recordSaved) {
       saveHighScore(score).then((updatedScores) => {
-        onGameOver(updatedScores); // Llamamos al callback para actualizar los scores en la pantalla Explore
+        // Puedes hacer algo aquí con updatedScores si es necesario
+        console.log('Puntuaciones actualizadas:', updatedScores);
       });
       setRecordSaved(true);
     }
