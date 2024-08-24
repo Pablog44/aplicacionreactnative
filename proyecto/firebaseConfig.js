@@ -1,8 +1,9 @@
+// firebaseConfig.js
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
-import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { getAuth } from 'firebase/auth';
 
-// Configuración de Firebase
+// Configuración de Firebase extraída de google-services.json
 const firebaseConfig = {
   apiKey: "AIzaSyC_VxeXPdAtORGQeCFw679B0d9pb32ng_w",
   authDomain: "ojala-105b4.firebaseapp.com",
@@ -13,7 +14,9 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+
+// Inicializar Firestore y Auth
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-export { db, auth, GoogleAuthProvider, signInWithPopup };
+export { db, auth };
