@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "731806955770",
+    "project_id": "ojala-105b4",
+    "storage_bucket": "ojala-105b4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:731806955770:android:d82134d3c1a381af6db143",
+        "android_client_info": {
+          "package_name": "com.pablo44.proyecto"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "731806955770-rdn2614jodtaludlj2lk6js6qti4ulr5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.pablo44.proyecto",
+            "certificate_hash": "d38ea5c9d611a5aa68279a7c01d3d6703deeac66"
+          }
+        },
+        {
+          "client_id": "731806955770-iq18vumkbti2emeddin5rlb92fo0gu0h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC_VxeXPdAtORGQeCFw679B0d9pb32ng_w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "731806955770-iq18vumkbti2emeddin5rlb92fo0gu0h.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

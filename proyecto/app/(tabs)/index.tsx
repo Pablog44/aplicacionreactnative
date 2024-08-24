@@ -1,9 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Platform } from 'react-native';
+import { saveHighScore } from './scoreService';
 
+interface HighScore {
+  score: number;
+  date: Date;
+}
+
+interface SnakeGameProps {
+  onGameOver: (scores: HighScore[]) => void; // Ajuste del tipo
+}
+
+const windowWidth = Dimensions.get('window').width;
+const isMobile = Platform.OS !== 'web' || windowWidth < 800;
 const GRID_SIZE = 15;
-const CELL_SIZE = Math.floor(Dimensions.get('window').width / GRID_SIZE);
-const INITIAL_SNAKE = [{ x: 7, y: 7 }];
+const CELL_SIZE = isMobile ? Math.floor(windowWidth / GRID_SIZE) : Math.min(30, Math.floor(windowWidth / GRID_SIZE));
+const INITIAL_SNAKE = [{ x: Math.floor(GRID_SIZE / 2), y: Math.floor(GRID_SIZE / 2) }];
 const INITIAL_FOOD = { x: Math.floor(Math.random() * GRID_SIZE), y: Math.floor(Math.random() * GRID_SIZE) };
 
 enum Direction {
@@ -13,17 +25,27 @@ enum Direction {
   Right,
 }
 
-export default function SnakeGame() {
+export default function SnakeGame({ onGameOver }: SnakeGameProps) {
   const [snake, setSnake] = useState(INITIAL_SNAKE);
   const [food, setFood] = useState(INITIAL_FOOD);
   const [direction, setDirection] = useState<Direction>(Direction.Right);
   const [isGameOver, setIsGameOver] = useState(false);
   const [score, setScore] = useState(0);
+  const [recordSaved, setRecordSaved] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(moveSnake, 200);
     return () => clearInterval(interval);
   }, [snake, direction]);
+
+  useEffect(() => {
+    if (isGameOver && !recordSaved) {
+      saveHighScore(score).then((updatedScores) => {
+        onGameOver(updatedScores); // Llamamos al callback para actualizar los scores en la pantalla Explore
+      });
+      setRecordSaved(true);
+    }
+  }, [isGameOver, recordSaved]);
 
   useEffect(() => {
     if (isGameOver) return;
@@ -104,6 +126,7 @@ export default function SnakeGame() {
     setDirection(Direction.Right);
     setIsGameOver(false);
     setScore(0);
+    setRecordSaved(false);
   };
 
   if (isGameOver) {
