@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { fetchHighScores } from './scoreService';
+import { fetchHighScores } from '../../components/scoreService';
 
 interface HighScore {
   score: number;

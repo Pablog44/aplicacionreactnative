@@ -1,5 +1,5 @@
 import { collection, addDoc, getDocs, query, orderBy, limit } from 'firebase/firestore';
-import { db } from '../../firebaseConfig';
+import { db } from '../firebaseConfig';
 
 export const saveHighScore = async (newScore, user) => {
   try {

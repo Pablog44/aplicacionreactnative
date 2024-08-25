@@ -1,5 +1,5 @@
 import { GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
-import { auth } from '../../firebaseConfig';
+import { auth } from '../firebaseConfig';
 
 export const signOutUser = async () => {
   try {
