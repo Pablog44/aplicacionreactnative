@@ -142,8 +142,6 @@ export default function SnakeGame() {
     <View style={styles.container}>
       <Text style={styles.scoreText}>Score: {score}</Text>
 
-      {/* Colocamos el componente de autenticación aquí */}
-      <Iniciar />
 
       <View style={styles.grid}>
         {Array.from({ length: GRID_SIZE * GRID_SIZE }).map((_, index) => {
