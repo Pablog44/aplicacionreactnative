@@ -4,7 +4,7 @@
     "slug": "proyecto",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/logo2.png",
+    "icon": "./assets/images/logo21.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "splash": {
@@ -17,7 +17,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/logo2.png",
+        "foregroundImage": "./assets/images/logo21.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.pablo44.proyecto"
@@ -25,7 +25,7 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/logo2.png"
+      "favicon": "./assets/images/logo21.png"
     },
     "plugins": [
       "expo-router"

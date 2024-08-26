@@ -6,16 +6,18 @@ import { GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
 import { auth } from '../../firebaseConfig';
 import { onAuthStateChanged, User } from 'firebase/auth';
 
+// Asegura que el flujo de autenticación se complete dentro de la app.
 WebBrowser.maybeCompleteAuthSession();
 
 export default function Iniciar() {
   const [user, setUser] = useState<User | null>(null);
 
-  // Configuración de Google Auth Request usando useIdTokenAuthRequest
-  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
+  // Configuración de Google Auth Request usando useAuthRequest
+  const [request, response, promptAsync] = Google.useAuthRequest({
     clientId: '731806955770-1hne8mc1kq5dvc16ntpm5pfhvbpq2bi8.apps.googleusercontent.com',
     androidClientId: '731806955770-rdn2614jodtaludlj2lk6js6qti4ulr5.apps.googleusercontent.com',
     webClientId: '731806955770-iq18vumkbti2emeddin5rlb92fo0gu0h.apps.googleusercontent.com',
+    redirectUri: 'https://auth.expo.io/@pablo44/proyecto', // URI gestionado por Expo
   });
 
   useEffect(() => {

@@ -68,10 +68,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    fontSize: 18,
+    fontSize: 16,
   },
   subtitle: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: 'bold',
     marginTop: 20,
     textAlign: 'center',
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   scoreText: {
-    fontSize: 20,
+    fontSize: 18,
     marginBottom: 10,
   },
 });
