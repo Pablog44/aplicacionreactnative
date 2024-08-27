@@ -1,45 +1,45 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import * as Google from 'expo-auth-session/providers/google';
-import * as WebBrowser from 'expo-web-browser';
+import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import { GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
 import { auth } from '../../firebaseConfig';
 import { onAuthStateChanged, User } from 'firebase/auth';
 
-// Asegura que el flujo de autenticación se complete dentro de la app.
-WebBrowser.maybeCompleteAuthSession();
-
 export default function Iniciar() {
   const [user, setUser] = useState<User | null>(null);
 
-  // Configuración de Google Auth Request usando useAuthRequest
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId: '731806955770-1hne8mc1kq5dvc16ntpm5pfhvbpq2bi8.apps.googleusercontent.com',
-    androidClientId: '731806955770-rdn2614jodtaludlj2lk6js6qti4ulr5.apps.googleusercontent.com',
-    webClientId: '731806955770-iq18vumkbti2emeddin5rlb92fo0gu0h.apps.googleusercontent.com',
-    redirectUri: 'https://auth.expo.io/@pablo44/proyecto', // URI gestionado por Expo
-  });
-
   useEffect(() => {
+    // Configura Google Sign-In
+    GoogleSignin.configure({
+      webClientId: '731806955770-iq18vumkbti2emeddin5rlb92fo0gu0h.apps.googleusercontent.com', // Reemplaza con tu webClientId de Google Cloud Console
+      offlineAccess: true,
+    });
+
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
     });
     return () => unsubscribe();
   }, []);
 
-  useEffect(() => {
-    if (response?.type === 'success') {
-      const { id_token } = response.params;
-      const credential = GoogleAuthProvider.credential(id_token);
-      signInWithCredential(auth, credential)
-        .then((userCredential) => {
-          console.log('Usuario autenticado:', userCredential.user);
-        })
-        .catch((error) => {
-          console.error('Error al autenticar con Google:', error);
-        });
+  const signInWithGoogle = async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
+      const { idToken } = userInfo;
+      const googleCredential = GoogleAuthProvider.credential(idToken);
+      await signInWithCredential(auth, googleCredential);
+    } catch (error: any) { // Cambiado a "any" para evitar problemas con TypeScript
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        console.log('El usuario canceló la autenticación');
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        console.log('El proceso de autenticación ya está en curso');
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        console.log('Google Play Services no está disponible');
+      } else {
+        console.error('Error en la autenticación:', error);
+      }
     }
-  }, [response]);
+  };
 
   return (
     <View style={styles.container}>
@@ -51,7 +51,7 @@ export default function Iniciar() {
           </TouchableOpacity>
         </>
       ) : (
-        <TouchableOpacity onPress={() => promptAsync()} style={styles.button}>
+        <TouchableOpacity onPress={signInWithGoogle} style={styles.button}>
           <Text style={styles.buttonText}>Iniciar sesión con Google</Text>
         </TouchableOpacity>
       )}

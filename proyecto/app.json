@@ -13,7 +13,13 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.pablo44.proyecto",
+      "config": {
+        "googleSignIn": {
+          "reservedClientId": "com.googleusercontent.apps.YOUR_IOS_CLIENT_ID" 
+        }
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -28,7 +34,17 @@
       "favicon": "./assets/images/logo21.png"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "scopes": ["profile", "email"],
+          "webClientId": "731806955770-iq18vumkbti2emeddin5rlb92fo0gu0h.apps.googleusercontent.com",
+          "androidClientId": "731806955770-rdn2614jodtaludlj2lk6js6qti4ulr5.apps.googleusercontent.com",
+          "offlineAccess": true,
+          "iosUrlScheme": "com.googleusercontent.apps.YOUR_IOS_CLIENT_ID"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
