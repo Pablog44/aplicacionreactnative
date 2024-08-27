@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Platform } from 'react-native';
 import { saveHighScore } from '../../components/scoreService';
-import Iniciar from './iniciar'; // Importa el nuevo componente
 
 const windowWidth = Dimensions.get('window').width;
 const isMobile = Platform.OS !== 'web' || windowWidth < 800;
