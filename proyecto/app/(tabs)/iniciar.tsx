@@ -13,6 +13,7 @@ export default function Iniciar() {
     GoogleSignin.configure({
       webClientId: '731806955770-iq18vumkbti2emeddin5rlb92fo0gu0h.apps.googleusercontent.com', // Reemplaza con tu webClientId de Google Cloud Console
       offlineAccess: true,
+      forceCodeForRefreshToken: true,  // Asegura que se pueda iniciar sesión con una cuenta diferente
     });
 
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -24,6 +25,7 @@ export default function Iniciar() {
   const signInWithGoogle = async () => {
     try {
       await GoogleSignin.hasPlayServices();
+      await GoogleSignin.signOut(); // Asegúrate de cerrar la sesión en Google Sign-In antes de iniciar una nueva
       const userInfo = await GoogleSignin.signIn();
       const { idToken } = userInfo;
       const googleCredential = GoogleAuthProvider.credential(idToken);
@@ -41,12 +43,22 @@ export default function Iniciar() {
     }
   };
 
+  const handleSignOut = async () => {
+    try {
+      await GoogleSignin.signOut(); // Cierra sesión de Google
+      await auth.signOut(); // Cierra sesión de Firebase
+      setUser(null); // Resetea el estado del usuario
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+    }
+  };
+
   return (
     <View style={styles.container}>
       {user ? (
         <>
           <Text style={styles.welcomeText}>Bienvenido, {user.displayName}</Text>
-          <TouchableOpacity onPress={async () => await auth.signOut()} style={styles.button}>
+          <TouchableOpacity onPress={handleSignOut} style={styles.button}>
             <Text style={styles.buttonText}>Cerrar sesión</Text>
           </TouchableOpacity>
         </>
