@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Platform } from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome'; // Importar iconos de FontAwesome
 import { saveHighScore } from '../../components/scoreService';
 
 const windowWidth = Dimensions.get('window').width;
@@ -8,10 +9,7 @@ const GRID_SIZE = 15;
 const CELL_SIZE = isMobile ? Math.floor(windowWidth / GRID_SIZE) : Math.min(30, Math.floor(windowWidth / GRID_SIZE));
 const INITIAL_SNAKE = [{ x: Math.floor(GRID_SIZE / 2), y: Math.floor(GRID_SIZE / 2) }];
 const INITIAL_FOOD = { x: Math.floor(Math.random() * GRID_SIZE), y: Math.floor(Math.random() * GRID_SIZE) };
-
-/**
- * Elimina la dependencia de onGameOver y maneja los puntajes internamente.
- */
+const BUTTON_SIZE = Math.floor(windowWidth / 5); // 1/3 del ancho de la pantalla
 
 enum Direction {
   Up,
@@ -36,7 +34,6 @@ export default function SnakeGame() {
   useEffect(() => {
     if (isGameOver && !recordSaved) {
       saveHighScore(score).then((updatedScores) => {
-        // Puedes hacer algo aquí con updatedScores si es necesario
         console.log('Puntuaciones actualizadas:', updatedScores);
       });
       setRecordSaved(true);
@@ -163,20 +160,29 @@ export default function SnakeGame() {
 
       {Platform.OS !== 'web' && (
         <View style={styles.controls}>
-          <TouchableOpacity onPress={() => setDirection(Direction.Up)} style={styles.controlButton}>
-            <Text style={styles.controlText}>Up</Text>
-          </TouchableOpacity>
+          <View style={styles.controlRow}>
+            <View style={styles.emptySpace} />
+            <TouchableOpacity onPress={() => setDirection(Direction.Up)} style={styles.controlButton}>
+              <Icon name="arrow-up" size={30} color="white" />
+            </TouchableOpacity>
+            <View style={styles.emptySpace} />
+          </View>
           <View style={styles.controlRow}>
             <TouchableOpacity onPress={() => setDirection(Direction.Left)} style={styles.controlButton}>
-              <Text style={styles.controlText}>Left</Text>
+              <Icon name="arrow-left" size={30} color="white" />
             </TouchableOpacity>
+            <View style={styles.emptySpace} />
             <TouchableOpacity onPress={() => setDirection(Direction.Right)} style={styles.controlButton}>
-              <Text style={styles.controlText}>Right</Text>
+              <Icon name="arrow-right" size={30} color="white" />
             </TouchableOpacity>
           </View>
-          <TouchableOpacity onPress={() => setDirection(Direction.Down)} style={styles.controlButton}>
-            <Text style={styles.controlText}>Down</Text>
-          </TouchableOpacity>
+          <View style={styles.controlRow}>
+            <View style={styles.emptySpace} />
+            <TouchableOpacity onPress={() => setDirection(Direction.Down)} style={styles.controlButton}>
+              <Icon name="arrow-down" size={30} color="white" />
+            </TouchableOpacity>
+            <View style={styles.emptySpace} />
+          </View>
         </View>
       )}
     </View>
@@ -217,7 +223,7 @@ const styles = StyleSheet.create({
   scoreText: {
     fontSize: 24,
     color: 'white',
-    marginBottom: 10,
+    marginBottom: 1,
   },
   button: {
     padding: 20,
@@ -234,18 +240,25 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   controls: {
-    marginTop: 30,
+    marginTop: 10,
     alignItems: 'center',
   },
   controlRow: {
     flexDirection: 'row',
-    marginTop: 10,
+    marginTop: 5,
   },
   controlButton: {
-    padding: 20,
+    width: BUTTON_SIZE,
+    height: BUTTON_SIZE,
     backgroundColor: '#888',
     borderRadius: 5,
-    margin: 5,
+    margin: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptySpace: {
+    width: BUTTON_SIZE,
+    height: BUTTON_SIZE,
   },
   controlText: {
     fontSize: 20,
