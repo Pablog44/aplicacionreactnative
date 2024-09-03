@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome';
 import { useFocusEffect } from '@react-navigation/native';
 import { fetchHighScores } from '../../components/scoreService';
 
@@ -10,25 +11,34 @@ interface HighScore {
 
 export default function ExploreScreen() {
   const [highScores, setHighScores] = useState<HighScore[]>([]);
-  const [loading, setLoading] = useState(true); // Nuevo estado para manejar el estado de carga
+  const [loading, setLoading] = useState(true);
+  const [gridSize, setGridSize] = useState(15); // Estado para manejar el tamaño de la cuadrícula
 
   useFocusEffect(
     React.useCallback(() => {
       const loadHighScores = async () => {
         try {
-          setLoading(true); // Iniciar la carga
-          const scores = await fetchHighScores();
+          setLoading(true);
+          const scores = await fetchHighScores(gridSize);
           setHighScores(scores);
         } catch (error) {
           console.error('Error cargando los scores:', error);
         } finally {
-          setLoading(false); // Finalizar la carga
+          setLoading(false);
         }
       };
 
       loadHighScores();
-    }, [])
+    }, [gridSize]) // Recargar los scores cuando cambie el gridSize
   );
+
+  const changeGridSize = (direction: 'left' | 'right') => {
+    setGridSize((prevSize) => {
+      if (direction === 'left') return Math.max(prevSize - 3, 6);
+      if (direction === 'right') return Math.min(prevSize + 3, 15);
+      return prevSize;
+    });
+  };
 
   if (loading) {
     return (
@@ -39,12 +49,25 @@ export default function ExploreScreen() {
   }
 
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString(); // Formateamos la fecha para mostrarla
+    return date.toLocaleDateString();
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.subtitle}>Top Scores:</Text>
+      <Text style={styles.subtitle}>Top Scores for {gridSize} x {gridSize}:</Text>
+      <View style={styles.gridSizeSelector}>
+        {gridSize > 8 && (
+          <TouchableOpacity onPress={() => changeGridSize('left')}>
+            <Icon name="caret-left" size={30} color="black" />
+          </TouchableOpacity>
+        )}
+        <Text style={styles.gridSizeText}>{gridSize} x {gridSize}</Text>
+        {gridSize < 15 && (
+          <TouchableOpacity onPress={() => changeGridSize('right')}>
+            <Icon name="caret-right" size={30} color="black" />
+          </TouchableOpacity>
+        )}
+      </View>
       <View style={styles.scoresContainer}>
         {highScores.map((highScore, index) => (
           <Text key={index} style={styles.scoreText}>
@@ -75,6 +98,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 20,
     textAlign: 'center',
+  },
+  gridSizeSelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  gridSizeText: {
+    fontSize: 24,
+    marginHorizontal: 20,
   },
   scoresContainer: {
     alignItems: 'center',

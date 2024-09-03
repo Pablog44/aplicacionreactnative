@@ -1,15 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Platform } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome'; // Importar iconos de FontAwesome
+import Icon from 'react-native-vector-icons/FontAwesome';
 import { saveHighScore } from '../../components/scoreService';
 
 const windowWidth = Dimensions.get('window').width;
 const isMobile = Platform.OS !== 'web' || windowWidth < 800;
-const GRID_SIZE = 15;
-const CELL_SIZE = isMobile ? Math.floor(windowWidth / GRID_SIZE) : Math.min(30, Math.floor(windowWidth / GRID_SIZE));
-const INITIAL_SNAKE = [{ x: Math.floor(GRID_SIZE / 2), y: Math.floor(GRID_SIZE / 2) }];
-const INITIAL_FOOD = { x: Math.floor(Math.random() * GRID_SIZE), y: Math.floor(Math.random() * GRID_SIZE) };
-const BUTTON_SIZE = Math.floor(windowWidth / 5); // 1/3 del ancho de la pantalla
+
+const BUTTON_SIZE = Math.floor(windowWidth / 5); // Definir BUTTON_SIZE al principio
 
 enum Direction {
   Up,
@@ -19,22 +16,28 @@ enum Direction {
 }
 
 export default function SnakeGame() {
-  const [snake, setSnake] = useState(INITIAL_SNAKE);
-  const [food, setFood] = useState(INITIAL_FOOD);
+  const [gridSize, setGridSize] = useState(15);
+  const CELL_SIZE = Math.floor(windowWidth / gridSize);
+
+  const [snake, setSnake] = useState([{ x: Math.floor(gridSize / 2), y: Math.floor(gridSize / 2) }]);
+  const [food, setFood] = useState({ x: Math.floor(Math.random() * gridSize), y: Math.floor(Math.random() * gridSize) });
   const [direction, setDirection] = useState<Direction>(Direction.Right);
   const [isGameOver, setIsGameOver] = useState(false);
   const [score, setScore] = useState(0);
   const [recordSaved, setRecordSaved] = useState(false);
+  const [gameStarted, setGameStarted] = useState(false);
 
   useEffect(() => {
-    const interval = setInterval(moveSnake, 200);
-    return () => clearInterval(interval);
-  }, [snake, direction]);
+    if (gameStarted) {
+      const interval = setInterval(moveSnake, 200);
+      return () => clearInterval(interval);
+    }
+  }, [snake, direction, gameStarted]);
 
   useEffect(() => {
     if (isGameOver && !recordSaved) {
-      saveHighScore(score).then((updatedScores) => {
-        console.log('Puntuaciones actualizadas:', updatedScores);
+      saveHighScore(score, null, gridSize).then(() => {
+        console.log('Puntuaciones actualizadas');
       });
       setRecordSaved(true);
     }
@@ -87,14 +90,15 @@ export default function SnakeGame() {
 
     if (checkCollision(head)) {
       setIsGameOver(true);
+      setGameStarted(false);
       return;
     }
 
     const newSnake = [head, ...snake];
     if (head.x === food.x && head.y === food.y) {
       setFood({
-        x: Math.floor(Math.random() * GRID_SIZE),
-        y: Math.floor(Math.random() * GRID_SIZE),
+        x: Math.floor(Math.random() * gridSize),
+        y: Math.floor(Math.random() * gridSize),
       });
       setScore(score + 1);
     } else {
@@ -106,30 +110,57 @@ export default function SnakeGame() {
   const checkCollision = (head: { x: number; y: number }) => {
     return (
       head.x < 0 ||
-      head.x >= GRID_SIZE ||
+      head.x >= gridSize ||
       head.y < 0 ||
-      head.y >= GRID_SIZE ||
+      head.y >= gridSize ||
       snake.some(segment => segment.x === head.x && segment.y === head.y)
     );
   };
 
   const resetGame = () => {
-    setSnake(INITIAL_SNAKE);
-    setFood(INITIAL_FOOD);
+    setSnake([{ x: Math.floor(gridSize / 2), y: Math.floor(gridSize / 2) }]);
+    setFood({
+      x: Math.floor(Math.random() * gridSize),
+      y: Math.floor(Math.random() * gridSize),
+    });
     setDirection(Direction.Right);
     setIsGameOver(false);
     setScore(0);
     setRecordSaved(false);
+    setGameStarted(false);
   };
 
-  if (isGameOver) {
+  const changeGridSize = (newSize: number) => {
+    setGridSize(newSize);
+    resetGame();
+  };
+
+  const startGame = () => {
+    setGameStarted(true);
+  };
+
+  if (isGameOver || !gameStarted) {
     return (
       <View style={styles.container}>
-        <Text style={styles.gameOverText}>Game Over</Text>
+        <Text style={styles.gameOverText}>{isGameOver ? "Game Over" : "Snake Game"}</Text>
         <Text style={styles.scoreText}>Score: {score}</Text>
-        <TouchableOpacity onPress={resetGame} style={styles.button}>
-          <Text style={styles.buttonText}>Play Again</Text>
+        <TouchableOpacity onPress={startGame} style={styles.button}>
+          <Text style={styles.buttonText}>{isGameOver ? "Play Again" : "Start Game"}</Text>
         </TouchableOpacity>
+
+        <View style={styles.gridSizeSelector}>
+          {gridSize > 8 && (
+            <TouchableOpacity onPress={() => changeGridSize(gridSize - 3)}>
+              <Icon name="caret-left" size={30} color="white" />
+            </TouchableOpacity>
+          )}
+          <Text style={styles.gridSizeText}>{gridSize} x {gridSize}</Text>
+          {gridSize < 15 && (
+            <TouchableOpacity onPress={() => changeGridSize(gridSize + 3)}>
+              <Icon name="caret-right" size={30} color="white" />
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
     );
   }
@@ -138,11 +169,10 @@ export default function SnakeGame() {
     <View style={styles.container}>
       <Text style={styles.scoreText}>Score: {score}</Text>
 
-
-      <View style={styles.grid}>
-        {Array.from({ length: GRID_SIZE * GRID_SIZE }).map((_, index) => {
-          const x = index % GRID_SIZE;
-          const y = Math.floor(index / GRID_SIZE);
+      <View style={[styles.grid, { width: gridSize * CELL_SIZE, height: gridSize * CELL_SIZE }]}>
+        {Array.from({ length: gridSize * gridSize }).map((_, index) => {
+          const x = index % gridSize;
+          const y = Math.floor(index / gridSize);
           const isSnake = snake.some(segment => segment.x === x && segment.y === y);
           const isFood = food.x === x && food.y === y;
           return (
@@ -150,6 +180,7 @@ export default function SnakeGame() {
               key={index}
               style={[
                 styles.cell,
+                { width: CELL_SIZE, height: CELL_SIZE },
                 isSnake && styles.snake,
                 isFood && styles.food,
               ]}
@@ -197,15 +228,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   grid: {
-    width: GRID_SIZE * CELL_SIZE,
-    height: GRID_SIZE * CELL_SIZE,
     flexDirection: 'row',
     flexWrap: 'wrap',
     backgroundColor: '#333',
   },
   cell: {
-    width: CELL_SIZE,
-    height: CELL_SIZE,
     borderWidth: 1,
     borderColor: '#444',
   },
@@ -223,7 +250,7 @@ const styles = StyleSheet.create({
   scoreText: {
     fontSize: 24,
     color: 'white',
-    marginBottom: 1,
+    marginBottom: 10,
   },
   button: {
     padding: 20,
@@ -233,11 +260,6 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 24,
     color: 'white',
-  },
-  welcomeText: {
-    fontSize: 18,
-    color: 'white',
-    marginBottom: 10,
   },
   controls: {
     marginTop: 10,
@@ -260,8 +282,14 @@ const styles = StyleSheet.create({
     width: BUTTON_SIZE,
     height: BUTTON_SIZE,
   },
-  controlText: {
-    fontSize: 20,
+  gridSizeSelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  gridSizeText: {
+    fontSize: 24,
     color: 'white',
+    marginHorizontal: 20,
   },
 });
