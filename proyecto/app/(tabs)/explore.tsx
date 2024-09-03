@@ -12,7 +12,7 @@ interface HighScore {
 export default function ExploreScreen() {
   const [highScores, setHighScores] = useState<HighScore[]>([]);
   const [loading, setLoading] = useState(true);
-  const [gridSize, setGridSize] = useState(15); // Estado para manejar el tamaño de la cuadrícula
+  const [gridSize, setGridSize] = useState(15);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -29,7 +29,7 @@ export default function ExploreScreen() {
       };
 
       loadHighScores();
-    }, [gridSize]) // Recargar los scores cuando cambie el gridSize
+    }, [gridSize])
   );
 
   const changeGridSize = (direction: 'left' | 'right') => {
@@ -57,13 +57,19 @@ export default function ExploreScreen() {
       <Text style={styles.subtitle}>Top Scores for {gridSize} x {gridSize}:</Text>
       <View style={styles.gridSizeSelector}>
         {gridSize > 8 && (
-          <TouchableOpacity onPress={() => changeGridSize('left')}>
+          <TouchableOpacity
+            onPress={() => changeGridSize('left')}
+            style={styles.iconWrapper}
+          >
             <Icon name="caret-left" size={30} color="black" />
           </TouchableOpacity>
         )}
         <Text style={styles.gridSizeText}>{gridSize} x {gridSize}</Text>
         {gridSize < 15 && (
-          <TouchableOpacity onPress={() => changeGridSize('right')}>
+          <TouchableOpacity
+            onPress={() => changeGridSize('right')}
+            style={styles.iconWrapper}
+          >
             <Icon name="caret-right" size={30} color="black" />
           </TouchableOpacity>
         )}
@@ -115,5 +121,14 @@ const styles = StyleSheet.create({
   scoreText: {
     fontSize: 18,
     marginBottom: 10,
+  },
+  iconWrapper: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#b6b6b6', // Color de fondo del círculo
+    marginHorizontal: 10,
   },
 });
