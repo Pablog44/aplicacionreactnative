@@ -54,13 +54,20 @@ export default function ExploreScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.subtitle}>Top Scores for {gridSize} x {gridSize}:</Text>
+      <View style={styles.scoresContainer}>
+        <Text style={styles.subtitle}>Top Scores for {gridSize} x {gridSize}:</Text>
+        {highScores.map((highScore, index) => (
+          <Text key={index} style={styles.scoreText}>
+            {index + 1}: {highScore.score} - {formatDate(highScore.date)}
+          </Text>
+        ))}
+      </View>
       <View style={styles.gridSizeSelector}>
         <TouchableOpacity
           onPress={() => changeGridSize('left')}
           style={[
             styles.iconWrapper,
-            gridSize <= 6 && styles.hiddenIcon, // Aplica el estilo oculto si el icono no debe mostrarse
+            gridSize <= 6 && styles.hiddenIcon,
           ]}
         >
           <Icon name="caret-left" size={30} color="black" />
@@ -70,18 +77,11 @@ export default function ExploreScreen() {
           onPress={() => changeGridSize('right')}
           style={[
             styles.iconWrapper,
-            gridSize >= 15 && styles.hiddenIcon, // Aplica el estilo oculto si el icono no debe mostrarse
+            gridSize >= 15 && styles.hiddenIcon,
           ]}
         >
           <Icon name="caret-right" size={30} color="black" />
         </TouchableOpacity>
-      </View>
-      <View style={styles.scoresContainer}>
-        {highScores.map((highScore, index) => (
-          <Text key={index} style={styles.scoreText}>
-            {index + 1}: {highScore.score} - {formatDate(highScore.date)}
-          </Text>
-        ))}
       </View>
     </View>
   );
@@ -90,8 +90,9 @@ export default function ExploreScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    paddingVertical: 20,
   },
   loadingContainer: {
     flex: 1,
@@ -101,24 +102,26 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 16,
   },
+  scoresContainer: {
+    width: '100%',
+    alignItems: 'center',
+  },
   subtitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    marginTop: 20,
+    marginTop: 30, // Añade un margen superior para separar el título del borde superior
+    marginBottom: 10,
     textAlign: 'center',
   },
   gridSizeSelector: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 20,
+    justifyContent: 'center',
+    width: '100%',
   },
   gridSizeText: {
     fontSize: 24,
     marginHorizontal: 20,
-  },
-  scoresContainer: {
-    alignItems: 'center',
-    marginTop: 20,
   },
   scoreText: {
     fontSize: 18,
@@ -134,7 +137,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
   },
   hiddenIcon: {
-    opacity: 0, // El ícono estará presente en el layout pero será invisible
+    opacity: 0,
   },
 });
-
