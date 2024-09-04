@@ -1,9 +1,9 @@
-// firebaseConfig.js
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
+import { initializeAuth, getReactNativePersistence } from 'firebase/auth'; // <- quitar "/react-native"
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Configuración de Firebase extraída de google-services.json
+// Configuración de Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyC_VxeXPdAtORGQeCFw679B0d9pb32ng_w",
   authDomain: "ojala-105b4.firebaseapp.com",
@@ -15,8 +15,12 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-// Inicializar Firestore y Auth
-const db = getFirestore(app);
-const auth = getAuth(app);
+// Inicializa Auth con persistencia
+const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(AsyncStorage),
+});
 
-export { db, auth };
+// Inicializa Firestore
+const db = getFirestore(app);
+
+export { auth, db };

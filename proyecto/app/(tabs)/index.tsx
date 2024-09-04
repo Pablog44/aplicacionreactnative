@@ -148,20 +148,82 @@ export default function SnakeGame() {
     setGameStarted(true);
   };
 
-  if (isGameOver || !gameStarted) {
-    return (
-      <View style={styles.container}>
-        <View style={styles.centeredContainer}>
-          <Text style={styles.gameOverText}>Snake Game</Text>
-          <Text style={styles.scoreText}>Score: {score}</Text>
-        </View>
+  return (
+    <View style={styles.container}>
+      <View style={styles.centeredContainer}>
+        {/* Mostrar el juego solo cuando esté en progreso */}
+        {gameStarted && !isGameOver && (
+          <>
+            <Text style={styles.scoreText}>Score: {score}</Text>
+            <View style={[styles.grid, { width: gridSize * CELL_SIZE, height: gridSize * CELL_SIZE }]}>
+              {Array.from({ length: gridSize * gridSize }).map((_, index) => {
+                const x = index % gridSize;
+                const y = Math.floor(index / gridSize);
+                const isSnake = snake.some(segment => segment.x === x && segment.y === y);
+                const isFood = food.x === x && food.y === y;
+                return (
+                  <View
+                    key={index}
+                    style={[
+                      styles.cell,
+                      { width: CELL_SIZE, height: CELL_SIZE },
+                      isSnake && styles.snake,
+                      isFood && styles.food,
+                    ]}
+                  />
+                );
+              })}
+            </View>
+
+            {/* Mostrar botones de control de la serpiente solo cuando el juego está en progreso */}
+            <View style={styles.controls}>
+              <View style={styles.controlRow}>
+                <View style={styles.emptySpace} />
+                <TouchableOpacity onPress={() => setDirection(Direction.Up)} style={styles.controlButton}>
+                  <Icon name="arrow-up" size={30} color="white" />
+                </TouchableOpacity>
+                <View style={styles.emptySpace} />
+              </View>
+              <View style={styles.controlRow}>
+                <TouchableOpacity onPress={() => setDirection(Direction.Left)} style={styles.controlButton}>
+                  <Icon name="arrow-left" size={30} color="white" />
+                </TouchableOpacity>
+                <View style={styles.emptySpace} />
+                <TouchableOpacity onPress={() => setDirection(Direction.Right)} style={styles.controlButton}>
+                  <Icon name="arrow-right" size={30} color="white" />
+                </TouchableOpacity>
+              </View>
+              <View style={styles.controlRow}>
+                <View style={styles.emptySpace} />
+                <TouchableOpacity onPress={() => setDirection(Direction.Down)} style={styles.controlButton}>
+                  <Icon name="arrow-down" size={30} color="white" />
+                </TouchableOpacity>
+                <View style={styles.emptySpace} />
+              </View>
+            </View>
+          </>
+        )}
+
+        {/* Mostrar pantalla de Game Over o Start */}
+        {(!gameStarted || isGameOver) && (
+          <>
+            <Text style={styles.gameOverText}>
+              {isGameOver ? "Game Over" : "Snake Game"}
+            </Text>
+            <Text style={styles.scoreText}>Score: {score}</Text>
+          </>
+        )}
+      </View>
+
+      {/* Mostrar controles solo cuando el juego no haya comenzado o esté en Game Over */}
+      {(!gameStarted || isGameOver) && (
         <View style={styles.bottomContainer}>
           <TouchableOpacity onPress={startGame} style={styles.button}>
             <Text style={styles.buttonText}>Start Game</Text>
           </TouchableOpacity>
           <View style={styles.gridSizeSelector}>
             <TouchableOpacity
-              onPress={() => changeGridSize(gridSize - 3)}  // Convertir a número si es necesario
+              onPress={() => changeGridSize(gridSize - 3)}
               style={[
                 styles.iconWrapper,
                 gridSize <= 6 && styles.hiddenIcon,
@@ -171,7 +233,7 @@ export default function SnakeGame() {
             </TouchableOpacity>
             <Text style={styles.gridSizeText}>{gridSize} x {gridSize}</Text>
             <TouchableOpacity
-              onPress={() => changeGridSize(gridSize + 3)}  // Convertir a número si es necesario
+              onPress={() => changeGridSize(gridSize + 3)}
               style={[
                 styles.iconWrapper,
                 gridSize >= 15 && styles.hiddenIcon,
@@ -181,60 +243,7 @@ export default function SnakeGame() {
             </TouchableOpacity>
           </View>
         </View>
-      </View>
-    );
-  }
-
-  return (
-    <View style={styles.container}>
-      <View style={styles.centeredContainer}>
-        <Text style={styles.scoreText}>Score: {score}</Text>
-        <View style={[styles.grid, { width: gridSize * CELL_SIZE, height: gridSize * CELL_SIZE }]}>
-          {Array.from({ length: gridSize * gridSize }).map((_, index) => {
-            const x = index % gridSize;
-            const y = Math.floor(index / gridSize);
-            const isSnake = snake.some(segment => segment.x === x && segment.y === y);
-            const isFood = food.x === x && food.y === y;
-            return (
-              <View
-                key={index}
-                style={[
-                  styles.cell,
-                  { width: CELL_SIZE, height: CELL_SIZE },
-                  isSnake && styles.snake,
-                  isFood && styles.food,
-                ]}
-              />
-            );
-          })}
-        </View>
-      </View>
-      <View style={styles.bottomContainer}>
-        <TouchableOpacity onPress={startGame} style={styles.button}>
-          <Text style={styles.buttonText}>Start Game</Text>
-        </TouchableOpacity>
-        <View style={styles.gridSizeSelector}>
-          <TouchableOpacity
-            onPress={() => changeGridSize(gridSize - 3)}  // Convertir a número si es necesario
-            style={[
-              styles.iconWrapper,
-              gridSize <= 6 && styles.hiddenIcon,
-            ]}
-          >
-            <Icon name="caret-left" size={30} color="white" />
-          </TouchableOpacity>
-          <Text style={styles.gridSizeText}>{gridSize} x {gridSize}</Text>
-          <TouchableOpacity
-            onPress={() => changeGridSize(gridSize + 3)}  // Convertir a número si es necesario
-            style={[
-              styles.iconWrapper,
-              gridSize >= 15 && styles.hiddenIcon,
-            ]}
-          >
-            <Icon name="caret-right" size={30} color="white" />
-          </TouchableOpacity>
-        </View>
-      </View>
+      )}
     </View>
   );
 }
