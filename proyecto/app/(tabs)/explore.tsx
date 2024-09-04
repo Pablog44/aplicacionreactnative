@@ -7,6 +7,7 @@ import { fetchHighScores } from '../../components/scoreService';
 interface HighScore {
   score: number;
   date: Date;
+  userName: string; // Incluir el nombre del usuario
 }
 
 export default function ExploreScreen() {
@@ -58,7 +59,7 @@ export default function ExploreScreen() {
         <Text style={styles.subtitle}>Top Scores for {gridSize} x {gridSize}:</Text>
         {highScores.map((highScore, index) => (
           <Text key={index} style={styles.scoreText}>
-            {index + 1}: {highScore.score} - {formatDate(highScore.date)}
+            {index + 1}: {highScore.userName || 'Anónimo'} - {highScore.score} - {formatDate(highScore.date)}
           </Text>
         ))}
       </View>

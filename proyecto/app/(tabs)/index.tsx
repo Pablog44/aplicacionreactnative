@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Platform } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { saveHighScore } from '../../components/scoreService';
+import { auth } from '../../firebaseConfig'; // Importar auth para obtener el usuario autenticado
+import { onAuthStateChanged, User } from 'firebase/auth'; // Importar Firebase Auth
 
 const windowWidth = Dimensions.get('window').width;
 const isMobile = Platform.OS !== 'web' || windowWidth < 800;
@@ -40,6 +42,17 @@ export default function SnakeGame() {
   const [recordSaved, setRecordSaved] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
 
+  const [user, setUser] = useState<User | null>(null); // Para manejar el estado del usuario
+
+  useEffect(() => {
+    // Suscribirse a los cambios en el estado de autenticación de Firebase
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+
+    return () => unsubscribe(); // Limpiar la suscripción al desmontar
+  }, []);
+
   useEffect(() => {
     if (gameStarted) {
       const interval = setInterval(moveSnake, 200);
@@ -49,12 +62,13 @@ export default function SnakeGame() {
 
   useEffect(() => {
     if (isGameOver && !recordSaved) {
-      saveHighScore(score, null, gridSize).then(() => {
+      // Guardar el high score con los detalles del usuario autenticado (si existe)
+      saveHighScore(score, user, gridSize).then(() => {
         console.log('Puntuaciones actualizadas');
       });
       setRecordSaved(true);
     }
-  }, [isGameOver, recordSaved, score]);
+  }, [isGameOver, recordSaved, score, user]); // Asegurarse de que el usuario se pase correctamente
 
   useEffect(() => {
     if (isGameOver) return;
