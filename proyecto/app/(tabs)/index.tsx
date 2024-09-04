@@ -6,7 +6,7 @@ import { saveHighScore } from '../../components/scoreService';
 const windowWidth = Dimensions.get('window').width;
 const isMobile = Platform.OS !== 'web' || windowWidth < 800;
 
-const BUTTON_SIZE = Math.floor(windowWidth / 5); // Definir BUTTON_SIZE al principio
+const BUTTON_SIZE = Math.floor(windowWidth / 5);
 
 enum Direction {
   Up,
@@ -15,12 +15,25 @@ enum Direction {
   Right,
 }
 
+const generateFoodPosition = (gridSize: number, snake: { x: number; y: number }[]): { x: number; y: number } => {
+  let newPosition: { x: number; y: number };
+  do {
+    newPosition = {
+      x: Math.floor(Math.random() * gridSize),
+      y: Math.floor(Math.random() * gridSize),
+    };
+  } while (snake.some(segment => segment.x === newPosition.x && segment.y === newPosition.y));
+  return newPosition;
+};
+
 export default function SnakeGame() {
   const [gridSize, setGridSize] = useState(15);
   const CELL_SIZE = Math.floor(windowWidth / gridSize);
 
-  const [snake, setSnake] = useState([{ x: Math.floor(gridSize / 2), y: Math.floor(gridSize / 2) }]);
-  const [food, setFood] = useState({ x: Math.floor(Math.random() * gridSize), y: Math.floor(Math.random() * gridSize) });
+  const getInitialSnakePosition = () => [{ x: 0, y: Math.floor(gridSize / 2) }]; // La serpiente comienza en la izquierda
+
+  const [snake, setSnake] = useState(getInitialSnakePosition());
+  const [food, setFood] = useState(generateFoodPosition(gridSize, snake));
   const [direction, setDirection] = useState<Direction>(Direction.Right);
   const [isGameOver, setIsGameOver] = useState(false);
   const [score, setScore] = useState(0);
@@ -96,10 +109,7 @@ export default function SnakeGame() {
 
     const newSnake = [head, ...snake];
     if (head.x === food.x && head.y === food.y) {
-      setFood({
-        x: Math.floor(Math.random() * gridSize),
-        y: Math.floor(Math.random() * gridSize),
-      });
+      setFood(generateFoodPosition(gridSize, newSnake)); // Generar nueva posición de comida con la nueva serpiente
       setScore(score + 1);
     } else {
       newSnake.pop();
@@ -118,11 +128,9 @@ export default function SnakeGame() {
   };
 
   const resetGame = () => {
-    setSnake([{ x: Math.floor(gridSize / 2), y: Math.floor(gridSize / 2) }]);
-    setFood({
-      x: Math.floor(Math.random() * gridSize),
-      y: Math.floor(Math.random() * gridSize),
-    });
+    const initialSnakePosition = getInitialSnakePosition();
+    setSnake(initialSnakePosition);
+    setFood(generateFoodPosition(gridSize, initialSnakePosition));
     setDirection(Direction.Right);
     setIsGameOver(false);
     setScore(0);
@@ -136,27 +144,28 @@ export default function SnakeGame() {
   };
 
   const startGame = () => {
+    resetGame();  // Reiniciar el juego completamente cuando se presiona Start Game
     setGameStarted(true);
   };
 
   if (isGameOver || !gameStarted) {
     return (
       <View style={styles.container}>
-        <Text style={styles.gameOverText}>{isGameOver ? "Game Over" : "Snake Game"}</Text>
+        <Text style={styles.gameOverText}>Snake Game</Text>
         <Text style={styles.scoreText}>Score: {score}</Text>
         <TouchableOpacity onPress={startGame} style={styles.button}>
-          <Text style={styles.buttonText}>{isGameOver ? "Play Again" : "Start Game"}</Text>
+          <Text style={styles.buttonText}>Start Game</Text>
         </TouchableOpacity>
 
         <View style={styles.gridSizeSelector}>
           {gridSize > 8 && (
-            <TouchableOpacity onPress={() => changeGridSize(gridSize - 3)}>
+            <TouchableOpacity onPress={() => changeGridSize(gridSize - 3)} style={styles.iconWrapper}>
               <Icon name="caret-left" size={30} color="white" />
             </TouchableOpacity>
           )}
           <Text style={styles.gridSizeText}>{gridSize} x {gridSize}</Text>
           {gridSize < 15 && (
-            <TouchableOpacity onPress={() => changeGridSize(gridSize + 3)}>
+            <TouchableOpacity onPress={() => changeGridSize(gridSize + 3)} style={styles.iconWrapper}>
               <Icon name="caret-right" size={30} color="white" />
             </TouchableOpacity>
           )}
@@ -291,5 +300,14 @@ const styles = StyleSheet.create({
     fontSize: 24,
     color: 'white',
     marginHorizontal: 20,
+  },
+  iconWrapper: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#888',
+    marginHorizontal: 10,
   },
 });

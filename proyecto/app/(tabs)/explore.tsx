@@ -56,23 +56,25 @@ export default function ExploreScreen() {
     <View style={styles.container}>
       <Text style={styles.subtitle}>Top Scores for {gridSize} x {gridSize}:</Text>
       <View style={styles.gridSizeSelector}>
-        {gridSize > 8 && (
-          <TouchableOpacity
-            onPress={() => changeGridSize('left')}
-            style={styles.iconWrapper}
-          >
-            <Icon name="caret-left" size={30} color="black" />
-          </TouchableOpacity>
-        )}
+        <TouchableOpacity
+          onPress={() => changeGridSize('left')}
+          style={[
+            styles.iconWrapper,
+            gridSize <= 6 && styles.hiddenIcon, // Aplica el estilo oculto si el icono no debe mostrarse
+          ]}
+        >
+          <Icon name="caret-left" size={30} color="black" />
+        </TouchableOpacity>
         <Text style={styles.gridSizeText}>{gridSize} x {gridSize}</Text>
-        {gridSize < 15 && (
-          <TouchableOpacity
-            onPress={() => changeGridSize('right')}
-            style={styles.iconWrapper}
-          >
-            <Icon name="caret-right" size={30} color="black" />
-          </TouchableOpacity>
-        )}
+        <TouchableOpacity
+          onPress={() => changeGridSize('right')}
+          style={[
+            styles.iconWrapper,
+            gridSize >= 15 && styles.hiddenIcon, // Aplica el estilo oculto si el icono no debe mostrarse
+          ]}
+        >
+          <Icon name="caret-right" size={30} color="black" />
+        </TouchableOpacity>
       </View>
       <View style={styles.scoresContainer}>
         {highScores.map((highScore, index) => (
@@ -120,7 +122,7 @@ const styles = StyleSheet.create({
   },
   scoreText: {
     fontSize: 18,
-    marginBottom: 10,
+    marginBottom: 5,
   },
   iconWrapper: {
     width: 50,
@@ -128,7 +130,11 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#b6b6b6', // Color de fondo del círculo
+    backgroundColor: '#b6b6b6',
     marginHorizontal: 10,
   },
+  hiddenIcon: {
+    opacity: 0, // El ícono estará presente en el layout pero será invisible
+  },
 });
+
