@@ -7,7 +7,7 @@ import { fetchHighScores } from '../../components/scoreService';
 interface HighScore {
   score: number;
   date: Date;
-  userName: string; // Incluir el nombre del usuario
+  userName: string;
 }
 
 export default function ExploreScreen() {
@@ -53,14 +53,21 @@ export default function ExploreScreen() {
     return date.toLocaleDateString();
   };
 
+  const truncateName = (name: string) => {
+    return name.split(' ')[0]; // Toma solo la primera palabra del nombre
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.scoresContainer}>
         <Text style={styles.subtitle}>Top Scores for {gridSize} x {gridSize}:</Text>
         {highScores.map((highScore, index) => (
-          <Text key={index} style={styles.scoreText}>
-            {index + 1}: {highScore.userName || 'Anónimo'} - {highScore.score} - {formatDate(highScore.date)}
-          </Text>
+          <View key={index} style={styles.row}>
+            <Text style={styles.cell}>{index + 1}º</Text>
+            <Text style={styles.cell}>{truncateName(highScore.userName || 'Anónimo')}</Text>
+            <Text style={styles.cell}>{highScore.score}</Text>
+            <Text style={styles.cell}>{formatDate(highScore.date)}</Text>
+          </View>
         ))}
       </View>
       <View style={styles.gridSizeSelector}>
@@ -110,8 +117,8 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    marginTop: 30, // Añade un margen superior para separar el título del borde superior
-    marginBottom: 10,
+    marginTop: 30,
+    marginBottom: 30,
     textAlign: 'center',
   },
   gridSizeSelector: {
@@ -124,9 +131,18 @@ const styles = StyleSheet.create({
     fontSize: 24,
     marginHorizontal: 20,
   },
-  scoreText: {
-    fontSize: 18,
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
     marginBottom: 5,
+    
+  },
+  cell: {
+    width: '25%',
+    textAlign: 'center',
+    fontSize: 16,
+    
   },
   iconWrapper: {
     width: 50,
