@@ -78,7 +78,7 @@ export default function ExploreScreen() {
             gridSize <= 6 && styles.hiddenIcon,
           ]}
         >
-          <Icon name="caret-left" size={30} color="black" />
+          <Icon name="caret-left" size={30} color="#FFD700" />
         </TouchableOpacity>
         <Text style={styles.gridSizeText}>{gridSize} x {gridSize}</Text>
         <TouchableOpacity
@@ -88,7 +88,7 @@ export default function ExploreScreen() {
             gridSize >= 15 && styles.hiddenIcon,
           ]}
         >
-          <Icon name="caret-right" size={30} color="black" />
+          <Icon name="caret-right" size={30} color="#FFD700" />
         </TouchableOpacity>
       </View>
     </View>
@@ -101,14 +101,17 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 20,
+    backgroundColor: '#121212', // Fondo oscuro
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#121212', // Fondo oscuro para la pantalla de carga
   },
   loadingText: {
     fontSize: 16,
+    color: '#FFD700', // Texto dorado oscuro
   },
   scoresContainer: {
     width: '100%',
@@ -120,6 +123,7 @@ const styles = StyleSheet.create({
     marginTop: 30,
     marginBottom: 30,
     textAlign: 'center',
+    color: '#FFD700', // Texto dorado oscuro
   },
   gridSizeSelector: {
     flexDirection: 'row',
@@ -130,19 +134,19 @@ const styles = StyleSheet.create({
   gridSizeText: {
     fontSize: 24,
     marginHorizontal: 20,
+    color: '#FFD700', // Texto dorado oscuro
   },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     marginBottom: 5,
-    
   },
   cell: {
     width: '25%',
     textAlign: 'center',
     fontSize: 16,
-    
+    color: '#FFD700', // Texto dorado oscuro
   },
   iconWrapper: {
     width: 50,
@@ -150,7 +154,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#b6b6b6',
+    backgroundColor: '#333333', // Fondo más oscuro para los iconos
     marginHorizontal: 10,
   },
   hiddenIcon: {
