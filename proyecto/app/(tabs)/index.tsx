@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Platform, Vibration } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { saveHighScore } from '../../components/scoreService';
 import { auth } from '../../firebaseConfig'; // Importar auth para obtener el usuario autenticado
@@ -162,10 +162,15 @@ export default function SnakeGame() {
     setGameStarted(true);
   };
 
+  // Función para manejar la vibración cuando se presiona un botón
+  const handleControlPress = (newDirection: Direction) => {
+    Vibration.vibrate(50); // Vibración corta de 50ms
+    setDirection(newDirection);
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.centeredContainer}>
-        {/* Mostrar el juego solo cuando esté en progreso */}
         {gameStarted && !isGameOver && (
           <>
             <Text style={styles.scoreText}>Score: {score}</Text>
@@ -189,27 +194,26 @@ export default function SnakeGame() {
               })}
             </View>
 
-            {/* Mostrar botones de control de la serpiente solo cuando el juego está en progreso */}
             <View style={styles.controls}>
               <View style={styles.controlRow}>
                 <View style={styles.emptySpace} />
-                <TouchableOpacity onPress={() => setDirection(Direction.Up)} style={styles.controlButton}>
+                <TouchableOpacity onPress={() => handleControlPress(Direction.Up)} style={styles.controlButton}>
                   <Icon name="arrow-up" size={30} color="white" />
                 </TouchableOpacity>
                 <View style={styles.emptySpace} />
               </View>
               <View style={styles.controlRow}>
-                <TouchableOpacity onPress={() => setDirection(Direction.Left)} style={styles.controlButton}>
+                <TouchableOpacity onPress={() => handleControlPress(Direction.Left)} style={styles.controlButton}>
                   <Icon name="arrow-left" size={30} color="white" />
                 </TouchableOpacity>
                 <View style={styles.emptySpace} />
-                <TouchableOpacity onPress={() => setDirection(Direction.Right)} style={styles.controlButton}>
+                <TouchableOpacity onPress={() => handleControlPress(Direction.Right)} style={styles.controlButton}>
                   <Icon name="arrow-right" size={30} color="white" />
                 </TouchableOpacity>
               </View>
               <View style={styles.controlRow}>
                 <View style={styles.emptySpace} />
-                <TouchableOpacity onPress={() => setDirection(Direction.Down)} style={styles.controlButton}>
+                <TouchableOpacity onPress={() => handleControlPress(Direction.Down)} style={styles.controlButton}>
                   <Icon name="arrow-down" size={30} color="white" />
                 </TouchableOpacity>
                 <View style={styles.emptySpace} />
@@ -218,7 +222,6 @@ export default function SnakeGame() {
           </>
         )}
 
-        {/* Mostrar pantalla de Game Over o Start */}
         {(!gameStarted || isGameOver) && (
           <>
             <Text style={styles.gameOverText}>
@@ -229,11 +232,10 @@ export default function SnakeGame() {
         )}
       </View>
 
-      {/* Mostrar controles solo cuando el juego no haya comenzado o esté en Game Over */}
       {(!gameStarted || isGameOver) && (
         <View style={styles.bottomContainer}>
-          <TouchableOpacity onPress={startGame} style={styles.button}>
-            <Text style={styles.buttonText}>Start Game</Text>
+          <TouchableOpacity onPress={startGame} style={styles.playButton}>
+            <Icon name="play" size={30} color="white" />
           </TouchableOpacity>
           <View style={styles.gridSizeSelector}>
             <TouchableOpacity
@@ -265,7 +267,7 @@ export default function SnakeGame() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#282c34',
+    backgroundColor: '#121212', // Fondo oscuro
     alignItems: 'center',
     justifyContent: 'space-between',
   },
@@ -282,37 +284,36 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    backgroundColor: '#333',
+    backgroundColor: '#333333', // Fondo más oscuro para la cuadrícula
   },
   cell: {
     borderWidth: 1,
-    borderColor: '#444',
+    borderColor: '#444444', // Color del borde de las celdas
   },
   snake: {
-    backgroundColor: 'green',
+    backgroundColor: '#4caf50', // Verde más suave para la serpiente
   },
   food: {
-    backgroundColor: 'red',
+    backgroundColor: '#ff5252', // Rojo brillante para la comida
   },
   gameOverText: {
     fontSize: 48,
-    color: 'white',
+    color: '#FFD700', // Texto dorado oscuro para "Game Over"
     marginBottom: 20,
   },
   scoreText: {
     fontSize: 24,
-    color: 'white',
+    color: '#FFD700', // Texto dorado oscuro para el puntaje
     marginBottom: 10,
   },
-  button: {
-    padding: 20,
-    backgroundColor: 'green',
-    borderRadius: 10,
+  playButton: {
+    width: 90, // Tamaño del botón ligeramente más grande
+    height: 90,
+    backgroundColor: '#444444', // Fondo oscuro para el botón "play"
+    borderRadius: 45, // Hacer el botón circular
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: 20,
-  },
-  buttonText: {
-    fontSize: 24,
-    color: 'white',
   },
   controls: {
     marginTop: 10,
@@ -325,7 +326,7 @@ const styles = StyleSheet.create({
   controlButton: {
     width: BUTTON_SIZE,
     height: BUTTON_SIZE,
-    backgroundColor: '#888',
+    backgroundColor: '#555555', // Fondo gris oscuro para los botones de control
     borderRadius: 5,
     margin: 2,
     alignItems: 'center',
@@ -343,7 +344,7 @@ const styles = StyleSheet.create({
   },
   gridSizeText: {
     fontSize: 24,
-    color: 'white',
+    color: '#FFD700', // Texto dorado oscuro para el tamaño de la cuadrícula
     marginHorizontal: 20,
   },
   iconWrapper: {
@@ -352,7 +353,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#888',
+    backgroundColor: '#555555', // Fondo gris oscuro para los íconos
     marginHorizontal: 10,
   },
   hiddenIcon: {

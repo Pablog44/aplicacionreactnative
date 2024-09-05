@@ -4,6 +4,7 @@ import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-si
 import { GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
 import { auth } from '../../firebaseConfig';
 import { onAuthStateChanged, User } from 'firebase/auth';
+import Icon from 'react-native-vector-icons/FontAwesome'; // Importa el ícono de FontAwesome
 
 export default function Iniciar() {
   const [user, setUser] = useState<User | null>(null);
@@ -30,7 +31,7 @@ export default function Iniciar() {
       const { idToken } = userInfo;
       const googleCredential = GoogleAuthProvider.credential(idToken);
       await signInWithCredential(auth, googleCredential);
-    } catch (error: any) { // Cambiado a "any" para evitar problemas con TypeScript
+    } catch (error: any) {
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
         console.log('El usuario canceló la autenticación');
       } else if (error.code === statusCodes.IN_PROGRESS) {
@@ -58,14 +59,18 @@ export default function Iniciar() {
       {user ? (
         <>
           <Text style={styles.welcomeText}>Bienvenido, {user.displayName}</Text>
-          <TouchableOpacity onPress={handleSignOut} style={styles.button}>
-            <Text style={styles.buttonText}>Cerrar sesión</Text>
+          <TouchableOpacity onPress={handleSignOut} style={styles.googleButton}>
+            <Icon name="sign-out" size={32} color="#FFD700" />
           </TouchableOpacity>
+          <Text style={styles.buttonText}>Cerrar sesión</Text>
         </>
       ) : (
-        <TouchableOpacity onPress={signInWithGoogle} style={styles.button}>
+        <>
+          <TouchableOpacity onPress={signInWithGoogle} style={styles.googleButton}>
+            <Icon name="google" size={32} color="#FFD700" />
+          </TouchableOpacity>
           <Text style={styles.buttonText}>Iniciar sesión con Google</Text>
-        </TouchableOpacity>
+        </>
       )}
     </View>
   );
@@ -76,19 +81,25 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#121212', // Fondo oscuro
   },
-  button: {
-    padding: 20,
-    backgroundColor: 'green',
-    borderRadius: 10,
+  googleButton: {
+    width: 70,
+    height: 70,
+    backgroundColor: '#333333', // Color oscuro para el botón
+    borderRadius: 35, // Hace el botón circular
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10, // Añade espacio entre el botón y el texto
   },
   buttonText: {
     fontSize: 18,
-    color: 'white',
+    color: '#FFD700', // Texto dorado
+    textAlign: 'center',
   },
   welcomeText: {
     fontSize: 18,
-    color: 'black',
+    color: '#FFD700', // Texto dorado
     marginBottom: 10,
   },
 });
