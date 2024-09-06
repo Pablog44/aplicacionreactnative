@@ -201,23 +201,23 @@ export default function SnakeGame() {
               <View style={styles.controlRow}>
                 <View style={styles.emptySpace} />
                 <TouchableOpacity onPress={() => handleControlPress(Direction.Up)} style={styles.controlButton}>
-                  <Icon name="arrow-up" size={30} color="white" />
+                  <Icon name="arrow-up" size={30} color="#FFD700" />
                 </TouchableOpacity>
                 <View style={styles.emptySpace} />
               </View>
               <View style={styles.controlRow}>
                 <TouchableOpacity onPress={() => handleControlPress(Direction.Left)} style={styles.controlButton}>
-                  <Icon name="arrow-left" size={30} color="white" />
+                  <Icon name="arrow-left" size={30} color="#FFD700" />
                 </TouchableOpacity>
                 <View style={styles.emptySpace} />
                 <TouchableOpacity onPress={() => handleControlPress(Direction.Right)} style={styles.controlButton}>
-                  <Icon name="arrow-right" size={30} color="white" />
+                  <Icon name="arrow-right" size={30} color="#FFD700" />
                 </TouchableOpacity>
               </View>
               <View style={styles.controlRow}>
                 <View style={styles.emptySpace} />
                 <TouchableOpacity onPress={() => handleControlPress(Direction.Down)} style={styles.controlButton}>
-                  <Icon name="arrow-down" size={30} color="white" />
+                  <Icon name="arrow-down" size={30} color="#FFD700" />
                 </TouchableOpacity>
                 <View style={styles.emptySpace} />
               </View>
@@ -298,10 +298,10 @@ const styles = StyleSheet.create({
   },
   cell: {
     borderWidth: 1,
-    borderColor: '#444444', // Color del borde de las celdas
+    borderColor: '#black', // Color del borde de las celdas
   },
   snake: {
-    backgroundColor: '#4caf50', // Verde más suave para la serpiente
+    backgroundColor: '#FFD700', // Verde más suave para la serpiente
   },
   food: {
     backgroundColor: '#ff5252', // Rojo brillante para la comida
