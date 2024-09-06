@@ -153,8 +153,11 @@ export default function SnakeGame() {
   };
 
   const changeGridSize = (newSize: number) => {
-    setGridSize(newSize);
-    resetGame();
+    // Limitar el tamaño de la cuadrícula entre 6 y 15
+    if (newSize >= 6 && newSize <= 15) {
+      setGridSize(newSize);
+      resetGame();
+    }
   };
 
   const startGame = () => {
@@ -235,27 +238,34 @@ export default function SnakeGame() {
       {(!gameStarted || isGameOver) && (
         <View style={styles.bottomContainer}>
           <TouchableOpacity onPress={startGame} style={styles.playButton}>
-            <Icon name="play" size={30} color="white" />
+            <Icon name="play" size={30} color="#FFD700" />
           </TouchableOpacity>
+
           <View style={styles.gridSizeSelector}>
+            {/* Botón para reducir el tamaño de la cuadrícula solo si es mayor que 6 */}
             <TouchableOpacity
               onPress={() => changeGridSize(gridSize - 3)}
               style={[
                 styles.iconWrapper,
-                gridSize <= 6 && styles.hiddenIcon,
+                gridSize <= 6 && styles.disabledIcon,
               ]}
+              disabled={gridSize <= 6}
             >
-              <Icon name="caret-left" size={30} color="white" />
+              <Icon name="caret-left" size={30} color="#FFD700" />
             </TouchableOpacity>
+            
             <Text style={styles.gridSizeText}>{gridSize} x {gridSize}</Text>
+
+            {/* Botón para aumentar el tamaño de la cuadrícula solo si es menor que 15 */}
             <TouchableOpacity
               onPress={() => changeGridSize(gridSize + 3)}
               style={[
                 styles.iconWrapper,
-                gridSize >= 15 && styles.hiddenIcon,
+                gridSize >= 15 && styles.disabledIcon,
               ]}
+              disabled={gridSize >= 15}
             >
-              <Icon name="caret-right" size={30} color="white" />
+              <Icon name="caret-right" size={30} color="#FFD700" />
             </TouchableOpacity>
           </View>
         </View>
@@ -279,7 +289,7 @@ const styles = StyleSheet.create({
   bottomContainer: {
     width: '100%',
     alignItems: 'center',
-    marginBottom: 30,
+    marginBottom: 60,
   },
   grid: {
     flexDirection: 'row',
@@ -299,7 +309,7 @@ const styles = StyleSheet.create({
   gameOverText: {
     fontSize: 48,
     color: '#FFD700', // Texto dorado oscuro para "Game Over"
-    marginBottom: 20,
+    marginTop: 90,
   },
   scoreText: {
     fontSize: 24,
@@ -313,7 +323,7 @@ const styles = StyleSheet.create({
     borderRadius: 45, // Hacer el botón circular
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 60,
   },
   controls: {
     marginTop: 10,
@@ -356,7 +366,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#555555', // Fondo gris oscuro para los íconos
     marginHorizontal: 10,
   },
-  hiddenIcon: {
-    opacity: 0,
+  disabledIcon: {
+    opacity: 0, // Reducir la opacidad cuando el botón está desactivado
   },
 });
