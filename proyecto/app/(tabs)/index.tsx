@@ -301,7 +301,7 @@ const styles = StyleSheet.create({
     borderColor: '#black', // Color del borde de las celdas
   },
   snake: {
-    backgroundColor: '#FFD700', // Verde más suave para la serpiente
+    backgroundColor: '#FFD700', // color para la serpiente
   },
   food: {
     backgroundColor: '#ff5252', // Rojo brillante para la comida

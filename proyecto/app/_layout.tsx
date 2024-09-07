@@ -3,6 +3,8 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
+import { StatusBar, Platform } from 'react-native'; // Importar StatusBar
+import * as NavigationBar from 'expo-navigation-bar'; // Usar el módulo de Expo para la barra de navegación
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -20,6 +22,11 @@ export default function RootLayout() {
     if (loaded) {
       SplashScreen.hideAsync();
     }
+
+    // Cambiar el color de la barra de navegación solo en Android
+    if (Platform.OS === 'android') {
+      NavigationBar.setBackgroundColorAsync('#121212'); // Fondo oscuro para la barra de navegación
+    }
   }, [loaded]);
 
   if (!loaded) {
@@ -28,6 +35,9 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      {/* Cambiar el color de la barra de estado */}
+      <StatusBar backgroundColor="#121212" barStyle="light-content" />
+
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
