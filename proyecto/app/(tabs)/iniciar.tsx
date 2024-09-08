@@ -54,11 +54,17 @@ export default function Iniciar() {
     }
   };
 
+  // Función para obtener solo el primer nombre
+  const getFirstName = (fullName: string | null | undefined) => {
+    if (!fullName) return ''; // Si no hay nombre, retorna cadena vacía
+    return fullName.split(' ')[0]; // Retorna la primera palabra del nombre
+  };
+
   return (
     <View style={styles.container}>
       {user ? (
         <>
-          <Text style={styles.welcomeText}>Bienvenido, {user.displayName}</Text>
+          <Text style={styles.welcomeText}>Bienvenido {getFirstName(user.displayName)}</Text> 
           <TouchableOpacity onPress={handleSignOut} style={styles.googleButton}>
             <Icon name="sign-out" size={32} color="#FFD700" />
           </TouchableOpacity>
