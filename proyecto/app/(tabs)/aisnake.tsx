@@ -102,72 +102,98 @@ export default function SnakeGame() {
     if (isGameOver) return;
 
     const head = { ...snake[0] };
-    switch (direction) {
-      case Direction.Up:
-        head.y -= 1;
-        break;
-      case Direction.Down:
-        head.y += 1;
-        break;
-      case Direction.Left:
-        head.x -= 1;
-        break;
-      case Direction.Right:
-        head.x += 1;
-        break;
+    const aiHead = aiSnake ? { ...aiSnake[0] } : null;
+
+    // Detect collision between player head and AI head before moving
+    if (aiHead && head.x === aiHead.x && head.y === aiHead.y) {
+        setIsGameOver(true);
+        setGameStarted(false);
+        return;
     }
 
+    // Move player snake
+    switch (direction) {
+        case Direction.Up:
+            head.y -= 1;
+            break;
+        case Direction.Down:
+            head.y += 1;
+            break;
+        case Direction.Left:
+            head.x -= 1;
+            break;
+        case Direction.Right:
+            head.x += 1;
+            break;
+    }
+
+    // Check collisions with walls or AI body
     if (checkCollision(head, [...(aiSnake || []), ...snake.slice(1)], gridSize)) {
-      setIsGameOver(true);
-      setGameStarted(false);
-      return;
+        setIsGameOver(true);
+        setGameStarted(false);
+        return;
     }
 
     const newSnake = [head, ...snake];
-    if (head.x === food.x && head.y === food.y) {
-      setFood(generateFoodPosition(gridSize, [newSnake, aiSnake || []]));
-      setScore(score + 1);
-    } else {
-      newSnake.pop();
-    }
-    setSnake(newSnake);
-  };
 
-  const moveAISnake = () => {
+    // Check if the player eats the food
+    if (head.x === food.x && head.y === food.y) {
+        setFood(generateFoodPosition(gridSize, [newSnake, aiSnake || []]));
+        setScore(score + 1);
+    } else {
+        newSnake.pop();
+    }
+
+    setSnake(newSnake);
+};
+
+const moveAISnake = () => {
     if (isGameOver || !aiSnake) return;
 
     const aiHead = { ...aiSnake[0] };
+    const playerHead = { ...snake[0] };
+
+    // Detect collision between AI head and player head before moving
+    if (aiHead.x === playerHead.x && aiHead.y === playerHead.y) {
+        setAISnake(null);
+        return;
+    }
+
     const possibleMoves = [
-      { x: aiHead.x, y: aiHead.y - 1, direction: Direction.Up },
-      { x: aiHead.x, y: aiHead.y + 1, direction: Direction.Down },
-      { x: aiHead.x - 1, y: aiHead.y, direction: Direction.Left },
-      { x: aiHead.x + 1, y: aiHead.y, direction: Direction.Right },
+        { x: aiHead.x, y: aiHead.y - 1, direction: Direction.Up },
+        { x: aiHead.x, y: aiHead.y + 1, direction: Direction.Down },
+        { x: aiHead.x - 1, y: aiHead.y, direction: Direction.Left },
+        { x: aiHead.x + 1, y: aiHead.y, direction: Direction.Right },
     ].filter(move => !checkCollision(move, [...snake, ...aiSnake], gridSize));
 
     const bestMove = chooseBestMove(possibleMoves, food);
 
     if (!bestMove) {
-      setAISnake(null);
-      return;
+        setAISnake(null); // AI disappears if it can't move
+        return;
     }
 
     aiHead.x = bestMove.x;
     aiHead.y = bestMove.y;
 
+    // Detect collision with player body
     if (checkCollision(aiHead, snake, gridSize)) {
-      setAISnake(null);
-      return;
+        setAISnake(null);
+        return;
     }
 
     const newAISnake = [aiHead, ...aiSnake];
+
+    // Check if the AI eats the food
     if (aiHead.x === food.x && aiHead.y === food.y) {
-      setFood(generateFoodPosition(gridSize, [snake, newAISnake]));
-      setAiScore(aiScore + 1);
+        setFood(generateFoodPosition(gridSize, [snake, newAISnake]));
+        setAiScore(aiScore + 1);
     } else {
-      newAISnake.pop();
+        newAISnake.pop();
     }
+
     setAISnake(newAISnake);
-  };
+};
 
   const resetGame = () => {
     setSnake(getInitialSnakePosition());
@@ -200,7 +226,7 @@ export default function SnakeGame() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.gameOverText}>{isGameOver ? 'Game Over' : 'Snake Game'}</Text>
+      <Text style={styles.gameOverText}>{isGameOver ? 'Game Over' : ''}</Text>
       <Text style={styles.scoreText}>Player: {score} | AI: {aiScore}</Text>
       <View style={[styles.grid, { width: gridSize * CELL_SIZE, height: gridSize * CELL_SIZE }]}>
         {Array.from({ length: gridSize * gridSize }).map((_, index) => {
