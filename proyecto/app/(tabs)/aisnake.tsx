@@ -6,7 +6,6 @@ import { auth } from '../../firebaseConfig';
 import { onAuthStateChanged, User } from 'firebase/auth';
 
 const windowWidth = Dimensions.get('window').width;
-const isMobile = Platform.OS !== 'web' || windowWidth < 800;
 const BUTTON_SIZE = Math.floor(windowWidth / 5);
 
 enum Direction {
@@ -77,6 +76,7 @@ export default function SnakeGame() {
   const [direction, setDirection] = useState<Direction>(Direction.Right);
   const [isGameOver, setIsGameOver] = useState(false);
   const [score, setScore] = useState(0);
+  const [aiScore, setAiScore] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
 
   const [user, setUser] = useState<User | null>(null);
@@ -162,6 +162,7 @@ export default function SnakeGame() {
     const newAISnake = [aiHead, ...aiSnake];
     if (aiHead.x === food.x && aiHead.y === food.y) {
       setFood(generateFoodPosition(gridSize, [snake, newAISnake]));
+      setAiScore(aiScore + 1);
     } else {
       newAISnake.pop();
     }
@@ -175,6 +176,7 @@ export default function SnakeGame() {
     setDirection(Direction.Right);
     setIsGameOver(false);
     setScore(0);
+    setAiScore(0);
     setGameStarted(false);
   };
 
@@ -190,7 +192,7 @@ export default function SnakeGame() {
       (newDirection === Direction.Left && direction === Direction.Right) ||
       (newDirection === Direction.Right && direction === Direction.Left)
     ) {
-      return; // Previene movimientos opuestos
+      return;
     }
     Vibration.vibrate(50);
     setDirection(newDirection);
@@ -199,7 +201,7 @@ export default function SnakeGame() {
   return (
     <View style={styles.container}>
       <Text style={styles.gameOverText}>{isGameOver ? 'Game Over' : 'Snake Game'}</Text>
-      <Text style={styles.scoreText}>Score: {score}</Text>
+      <Text style={styles.scoreText}>Player: {score} | AI: {aiScore}</Text>
       <View style={[styles.grid, { width: gridSize * CELL_SIZE, height: gridSize * CELL_SIZE }]}>
         {Array.from({ length: gridSize * gridSize }).map((_, index) => {
           const x = index % gridSize;
@@ -221,31 +223,33 @@ export default function SnakeGame() {
           );
         })}
       </View>
-      <View style={styles.controls}>
-        <View style={styles.controlRow}>
-          <View style={styles.emptySpace} />
-          <TouchableOpacity onPress={() => handleControlPress(Direction.Up)} style={styles.controlButton}>
-            <Icon name="arrow-up" size={30} color="#FFD700" />
-          </TouchableOpacity>
-          <View style={styles.emptySpace} />
+      {!isGameOver && gameStarted && (
+        <View style={styles.controls}>
+          <View style={styles.controlRow}>
+            <View style={styles.emptySpace} />
+            <TouchableOpacity onPress={() => handleControlPress(Direction.Up)} style={styles.controlButton}>
+              <Icon name="arrow-up" size={30} color="#FFD700" />
+            </TouchableOpacity>
+            <View style={styles.emptySpace} />
+          </View>
+          <View style={styles.controlRow}>
+            <TouchableOpacity onPress={() => handleControlPress(Direction.Left)} style={styles.controlButton}>
+              <Icon name="arrow-left" size={30} color="#FFD700" />
+            </TouchableOpacity>
+            <View style={styles.emptySpace} />
+            <TouchableOpacity onPress={() => handleControlPress(Direction.Right)} style={styles.controlButton}>
+              <Icon name="arrow-right" size={30} color="#FFD700" />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.controlRow}>
+            <View style={styles.emptySpace} />
+            <TouchableOpacity onPress={() => handleControlPress(Direction.Down)} style={styles.controlButton}>
+              <Icon name="arrow-down" size={30} color="#FFD700" />
+            </TouchableOpacity>
+            <View style={styles.emptySpace} />
+          </View>
         </View>
-        <View style={styles.controlRow}>
-          <TouchableOpacity onPress={() => handleControlPress(Direction.Left)} style={styles.controlButton}>
-            <Icon name="arrow-left" size={30} color="#FFD700" />
-          </TouchableOpacity>
-          <View style={styles.emptySpace} />
-          <TouchableOpacity onPress={() => handleControlPress(Direction.Right)} style={styles.controlButton}>
-            <Icon name="arrow-right" size={30} color="#FFD700" />
-          </TouchableOpacity>
-        </View>
-        <View style={styles.controlRow}>
-          <View style={styles.emptySpace} />
-          <TouchableOpacity onPress={() => handleControlPress(Direction.Down)} style={styles.controlButton}>
-            <Icon name="arrow-down" size={30} color="#FFD700" />
-          </TouchableOpacity>
-          <View style={styles.emptySpace} />
-        </View>
-      </View>
+      )}
       {!gameStarted && (
         <TouchableOpacity onPress={startGame} style={styles.playButton}>
           <Icon name="play" size={30} color="#FFD700" />
