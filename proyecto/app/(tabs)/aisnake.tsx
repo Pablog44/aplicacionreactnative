@@ -111,6 +111,12 @@ export default function SnakeGame() {
     }
   }, [isGameOver]);
 
+  useEffect(() => {
+    if (aiSnake === null && reviveMode && gameStarted) {
+      setTimeout(() => reviveAISnake(), 1000); // Intentar revivir después de 1 segundo
+    }
+  }, [aiSnake, reviveMode, gameStarted]);
+
   const moveSnake = () => {
     if (isGameOver) return;
 
@@ -206,6 +212,26 @@ export default function SnakeGame() {
 
     setAISnake(newAISnake);
   };
+//logica de revivir para la serpiente ia
+  const reviveAISnake = () => {
+    if (!reviveMode || !gameStarted) return;
+  
+    const initialPosition = getInitialAISnakePosition();
+  
+    // Verifica si la posición inicial está ocupada por el jugador
+    const isPlayerBlocking = snake.some(segment => 
+      segment.x === initialPosition[0].x && segment.y === initialPosition[0].y
+    );
+  
+    if (isPlayerBlocking) {
+      // Si el jugador está bloqueando, espera otro segundo y vuelve a intentar
+      setTimeout(() => reviveAISnake(), 1000);
+    } else {
+      // Si no está bloqueada, revive la IA
+      setAISnake(initialPosition);
+    }
+  };
+  
 
   const resetGame = () => {
     setSnake(getInitialSnakePosition());
