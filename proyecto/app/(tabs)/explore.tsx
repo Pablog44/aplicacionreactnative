@@ -21,9 +21,11 @@ interface AIRecord {
 export default function ExploreScreen() {
   const [highScores, setHighScores] = useState<HighScore[]>([]);
   const [aiRecords, setAIRecords] = useState<AIRecord[]>([]);
+  const [aiReviveRecords, setAIReviveRecords] = useState<AIRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [gridSize, setGridSize] = useState(15);
   const [showAIRecords, setShowAIRecords] = useState(false);
+  const [showAIReviveRecords, setShowAIReviveRecords] = useState(false);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -32,11 +34,12 @@ export default function ExploreScreen() {
           setLoading(true);
 
           if (gridSize === 15 && showAIRecords) {
-            // Cargar registros vs IA
-            const records = await fetchAIRecords(1);
+            const records = await fetchAIRecords(1); // Records vs IA
             setAIRecords(records);
+          } else if (gridSize === 15 && showAIReviveRecords) {
+            const reviveRecords = await fetchAIRecords(2); // Records IA revive
+            setAIReviveRecords(reviveRecords);
           } else {
-            // Cargar registros normales
             const scores = await fetchHighScores(gridSize);
             setHighScores(scores);
           }
@@ -48,14 +51,25 @@ export default function ExploreScreen() {
       };
 
       loadScores();
-    }, [gridSize, showAIRecords])
+    }, [gridSize, showAIRecords, showAIReviveRecords])
   );
 
   const changeGridSize = (direction: 'left' | 'right') => {
     if (gridSize === 15 && direction === 'right') {
-      setShowAIRecords(true);
-    } else if (showAIRecords && direction === 'left') {
-      setShowAIRecords(false);
+      if (showAIRecords) {
+        setShowAIRecords(false);
+        setShowAIReviveRecords(true);
+      } else {
+        setShowAIRecords(true);
+        setShowAIReviveRecords(false);
+      }
+    } else if ((showAIRecords || showAIReviveRecords) && direction === 'left') {
+      if (showAIReviveRecords) {
+        setShowAIReviveRecords(false);
+        setShowAIRecords(true);
+      } else {
+        setShowAIRecords(false);
+      }
     } else {
       setGridSize((prevSize) => {
         if (direction === 'left') return Math.max(prevSize - 3, 6);
@@ -80,7 +94,20 @@ export default function ExploreScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.scoresContainer}>
-        {gridSize === 15 && showAIRecords ? (
+        {gridSize === 15 && showAIReviveRecords ? (
+          <>
+            <Text style={styles.subtitle}>Records IA Revive</Text>
+            {aiReviveRecords.map((record, index) => (
+              <View key={index} style={styles.row}>
+                <Text style={styles.cell}>{index + 1}º</Text>
+                <Text style={styles.cell}>{truncateName(record.userName || 'Anónimo')}</Text>
+                <Text style={styles.cell}>{record.playerScore}</Text>
+                <Text style={styles.cell}>{record.aiScore}</Text>
+                <Text style={styles.cell}>{formatDate(record.date)}</Text>
+              </View>
+            ))}
+          </>
+        ) : gridSize === 15 && showAIRecords ? (
           <>
             <Text style={styles.subtitle}>Top Records vs IA</Text>
             {aiRecords.map((record, index) => (
@@ -110,16 +137,23 @@ export default function ExploreScreen() {
       <View style={styles.gridSizeSelector}>
         <TouchableOpacity
           onPress={() => changeGridSize('left')}
-          style={[styles.iconWrapper, gridSize <= 6 && !showAIRecords && styles.hiddenIcon]}
+          style={[styles.iconWrapper, gridSize <= 6 && !showAIRecords && !showAIReviveRecords && styles.hiddenIcon]}
         >
           <Icon name="caret-left" size={30} color="#FFD700" />
         </TouchableOpacity>
         <Text style={styles.gridSizeText}>
-          {gridSize === 15 && showAIRecords ? 'Records vs IA' : `${gridSize} x ${gridSize}`}
+          {gridSize === 15 && showAIReviveRecords
+            ? 'Records IA Revive'
+            : gridSize === 15 && showAIRecords
+            ? 'Records vs IA'
+            : `${gridSize} x ${gridSize}`}
         </Text>
         <TouchableOpacity
           onPress={() => changeGridSize('right')}
-          style={[styles.iconWrapper, gridSize === 15 && showAIRecords && styles.hiddenIcon]}
+          style={[
+            styles.iconWrapper,
+            gridSize === 15 && showAIReviveRecords && styles.hiddenIcon,
+          ]}
         >
           <Icon name="caret-right" size={30} color="#FFD700" />
         </TouchableOpacity>

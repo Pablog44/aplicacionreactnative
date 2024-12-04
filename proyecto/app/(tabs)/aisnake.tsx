@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Platform, Vibration } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Platform, Vibration, Switch } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { auth } from '../../firebaseConfig';
 import { onAuthStateChanged, User } from 'firebase/auth';
@@ -78,7 +78,7 @@ export default function SnakeGame() {
   const [score, setScore] = useState(0);
   const [aiScore, setAiScore] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
-
+  const [reviveMode, setReviveMode] = useState(false); // Switch para activar/desactivar el modo revive
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
@@ -100,9 +100,14 @@ export default function SnakeGame() {
 
   useEffect(() => {
     if (isGameOver) {
-      saveAIRecord(score, aiScore, 1, user) // Llamar a saveAIRecord para guardar los datos
+      saveAIRecord(score, aiScore, reviveMode ? 2 : 1, user) // Modo revive: 2, modo normal: 1
         .then(() => console.log('Registro de juego guardado.'))
         .catch(err => console.error('Error guardando el registro:', err));
+      if (reviveMode && aiSnake === null) {
+        setTimeout(() => {
+          setAISnake(getInitialAISnakePosition()); // Revive la IA después de 1 segundo
+        }, 1000);
+      }
     }
   }, [isGameOver]);
 
@@ -177,7 +182,7 @@ export default function SnakeGame() {
     const bestMove = chooseBestMove(possibleMoves, food);
 
     if (!bestMove) {
-      setAISnake(null); // AI disappears if it can't move
+      setAISnake(null);
       return;
     }
 
@@ -284,9 +289,20 @@ export default function SnakeGame() {
         </View>
       )}
       {!gameStarted && (
-        <TouchableOpacity onPress={startGame} style={styles.playButton}>
-          <Icon name="play" size={30} color="#FFD700" />
-        </TouchableOpacity>
+        <View>
+          <TouchableOpacity onPress={startGame} style={styles.playButton}>
+            <Icon name="play" size={30} color="#FFD700" />
+          </TouchableOpacity>
+          <View style={styles.switchContainer}>
+            <Text style={styles.switchLabel}>Revive:</Text>
+            <Switch
+              value={reviveMode}
+              onValueChange={setReviveMode}
+              thumbColor={reviveMode ? '#FFD700' : '#666666'}
+              trackColor={{ false: '#444444', true: '#FFD700' }}
+            />
+          </View>
+        </View>
       )}
     </View>
   );
@@ -357,5 +373,16 @@ const styles = StyleSheet.create({
   emptySpace: {
     width: BUTTON_SIZE,
     height: BUTTON_SIZE,
+  },
+  switchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 10,
+  },
+  switchLabel: {
+    fontSize: 16,
+    color: '#FFD700',
+    marginRight: 10,
   },
 });
