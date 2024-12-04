@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Platform, Vibration } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { saveHighScore } from '../../components/scoreService';
 import { auth } from '../../firebaseConfig';
 import { onAuthStateChanged, User } from 'firebase/auth';
+import { saveAIRecord } from '../../components/scoreAIService'; // Importar el nuevo componente
 
 const windowWidth = Dimensions.get('window').width;
 const BUTTON_SIZE = Math.floor(windowWidth / 5);
@@ -98,6 +98,14 @@ export default function SnakeGame() {
     }
   }, [snake, aiSnake, direction, gameStarted]);
 
+  useEffect(() => {
+    if (isGameOver) {
+      saveAIRecord(score, aiScore, 1, user) // Llamar a saveAIRecord para guardar los datos
+        .then(() => console.log('Registro de juego guardado.'))
+        .catch(err => console.error('Error guardando el registro:', err));
+    }
+  }, [isGameOver]);
+
   const moveSnake = () => {
     if (isGameOver) return;
 
@@ -106,48 +114,48 @@ export default function SnakeGame() {
 
     // Detect collision between player head and AI head before moving
     if (aiHead && head.x === aiHead.x && head.y === aiHead.y) {
-        setIsGameOver(true);
-        setGameStarted(false);
-        return;
+      setIsGameOver(true);
+      setGameStarted(false);
+      return;
     }
 
     // Move player snake
     switch (direction) {
-        case Direction.Up:
-            head.y -= 1;
-            break;
-        case Direction.Down:
-            head.y += 1;
-            break;
-        case Direction.Left:
-            head.x -= 1;
-            break;
-        case Direction.Right:
-            head.x += 1;
-            break;
+      case Direction.Up:
+        head.y -= 1;
+        break;
+      case Direction.Down:
+        head.y += 1;
+        break;
+      case Direction.Left:
+        head.x -= 1;
+        break;
+      case Direction.Right:
+        head.x += 1;
+        break;
     }
 
     // Check collisions with walls or AI body
     if (checkCollision(head, [...(aiSnake || []), ...snake.slice(1)], gridSize)) {
-        setIsGameOver(true);
-        setGameStarted(false);
-        return;
+      setIsGameOver(true);
+      setGameStarted(false);
+      return;
     }
 
     const newSnake = [head, ...snake];
 
     // Check if the player eats the food
     if (head.x === food.x && head.y === food.y) {
-        setFood(generateFoodPosition(gridSize, [newSnake, aiSnake || []]));
-        setScore(score + 1);
+      setFood(generateFoodPosition(gridSize, [newSnake, aiSnake || []]));
+      setScore(score + 1);
     } else {
-        newSnake.pop();
+      newSnake.pop();
     }
 
     setSnake(newSnake);
-};
+  };
 
-const moveAISnake = () => {
+  const moveAISnake = () => {
     if (isGameOver || !aiSnake) return;
 
     const aiHead = { ...aiSnake[0] };
@@ -155,45 +163,44 @@ const moveAISnake = () => {
 
     // Detect collision between AI head and player head before moving
     if (aiHead.x === playerHead.x && aiHead.y === playerHead.y) {
-        setAISnake(null);
-        return;
+      setAISnake(null);
+      return;
     }
 
     const possibleMoves = [
-        { x: aiHead.x, y: aiHead.y - 1, direction: Direction.Up },
-        { x: aiHead.x, y: aiHead.y + 1, direction: Direction.Down },
-        { x: aiHead.x - 1, y: aiHead.y, direction: Direction.Left },
-        { x: aiHead.x + 1, y: aiHead.y, direction: Direction.Right },
+      { x: aiHead.x, y: aiHead.y - 1, direction: Direction.Up },
+      { x: aiHead.x, y: aiHead.y + 1, direction: Direction.Down },
+      { x: aiHead.x - 1, y: aiHead.y, direction: Direction.Left },
+      { x: aiHead.x + 1, y: aiHead.y, direction: Direction.Right },
     ].filter(move => !checkCollision(move, [...snake, ...aiSnake], gridSize));
 
     const bestMove = chooseBestMove(possibleMoves, food);
 
     if (!bestMove) {
-        setAISnake(null); // AI disappears if it can't move
-        return;
+      setAISnake(null); // AI disappears if it can't move
+      return;
     }
 
     aiHead.x = bestMove.x;
     aiHead.y = bestMove.y;
 
-    // Detect collision with player body
     if (checkCollision(aiHead, snake, gridSize)) {
-        setAISnake(null);
-        return;
+      setAISnake(null);
+      return;
     }
 
     const newAISnake = [aiHead, ...aiSnake];
 
     // Check if the AI eats the food
     if (aiHead.x === food.x && aiHead.y === food.y) {
-        setFood(generateFoodPosition(gridSize, [snake, newAISnake]));
-        setAiScore(aiScore + 1);
+      setFood(generateFoodPosition(gridSize, [snake, newAISnake]));
+      setAiScore(aiScore + 1);
     } else {
-        newAISnake.pop();
+      newAISnake.pop();
     }
 
     setAISnake(newAISnake);
-};
+  };
 
   const resetGame = () => {
     setSnake(getInitialSnakePosition());
