@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useFocusEffect } from '@react-navigation/native';
 import { fetchHighScores } from '../../components/scoreService';
+import { fetchAIRecords } from '../../components/scoreAIService';
 
 interface HighScore {
   score: number;
@@ -10,18 +11,35 @@ interface HighScore {
   userName: string;
 }
 
+interface AIRecord {
+  playerScore: number;
+  aiScore: number;
+  date: Date;
+  userName: string;
+}
+
 export default function ExploreScreen() {
   const [highScores, setHighScores] = useState<HighScore[]>([]);
+  const [aiRecords, setAIRecords] = useState<AIRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [gridSize, setGridSize] = useState(15);
+  const [showAIRecords, setShowAIRecords] = useState(false);
 
   useFocusEffect(
     React.useCallback(() => {
-      const loadHighScores = async () => {
+      const loadScores = async () => {
         try {
           setLoading(true);
-          const scores = await fetchHighScores(gridSize);
-          setHighScores(scores);
+
+          if (gridSize === 15 && showAIRecords) {
+            // Cargar registros vs IA
+            const records = await fetchAIRecords(1);
+            setAIRecords(records);
+          } else {
+            // Cargar registros normales
+            const scores = await fetchHighScores(gridSize);
+            setHighScores(scores);
+          }
         } catch (error) {
           console.error('Error cargando los scores:', error);
         } finally {
@@ -29,17 +47,27 @@ export default function ExploreScreen() {
         }
       };
 
-      loadHighScores();
-    }, [gridSize])
+      loadScores();
+    }, [gridSize, showAIRecords])
   );
 
   const changeGridSize = (direction: 'left' | 'right') => {
-    setGridSize((prevSize) => {
-      if (direction === 'left') return Math.max(prevSize - 3, 6);
-      if (direction === 'right') return Math.min(prevSize + 3, 15);
-      return prevSize;
-    });
+    if (gridSize === 15 && direction === 'right') {
+      setShowAIRecords(true);
+    } else if (showAIRecords && direction === 'left') {
+      setShowAIRecords(false);
+    } else {
+      setGridSize((prevSize) => {
+        if (direction === 'left') return Math.max(prevSize - 3, 6);
+        if (direction === 'right') return Math.min(prevSize + 3, 15);
+        return prevSize;
+      });
+    }
   };
+
+  const formatDate = (date: Date) => date.toLocaleDateString();
+
+  const truncateName = (name: string) => name.split(' ')[0];
 
   if (loading) {
     return (
@@ -49,44 +77,49 @@ export default function ExploreScreen() {
     );
   }
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString();
-  };
-
-  const truncateName = (name: string) => {
-    return name.split(' ')[0]; // Toma solo la primera palabra del nombre
-  };
-
   return (
     <View style={styles.container}>
       <View style={styles.scoresContainer}>
-        <Text style={styles.subtitle}>Top Scores for {gridSize} x {gridSize}:</Text>
-        {highScores.map((highScore, index) => (
-          <View key={index} style={styles.row}>
-            <Text style={styles.cell}>{index + 1}º</Text>
-            <Text style={styles.cell}>{truncateName(highScore.userName || 'Anónimo')}</Text>
-            <Text style={styles.cell}>{highScore.score}</Text>
-            <Text style={styles.cell}>{formatDate(highScore.date)}</Text>
-          </View>
-        ))}
+        {gridSize === 15 && showAIRecords ? (
+          <>
+            <Text style={styles.subtitle}>Top Records vs IA</Text>
+            {aiRecords.map((record, index) => (
+              <View key={index} style={styles.row}>
+                <Text style={styles.cell}>{index + 1}º</Text>
+                <Text style={styles.cell}>{truncateName(record.userName || 'Anónimo')}</Text>
+                <Text style={styles.cell}>{record.playerScore}</Text>
+                <Text style={styles.cell}>{record.aiScore}</Text>
+                <Text style={styles.cell}>{formatDate(record.date)}</Text>
+              </View>
+            ))}
+          </>
+        ) : (
+          <>
+            <Text style={styles.subtitle}>Top Scores for {gridSize} x {gridSize}:</Text>
+            {highScores.map((highScore, index) => (
+              <View key={index} style={styles.row}>
+                <Text style={styles.cell}>{index + 1}º</Text>
+                <Text style={styles.cell}>{truncateName(highScore.userName || 'Anónimo')}</Text>
+                <Text style={styles.cell}>{highScore.score}</Text>
+                <Text style={styles.cell}>{formatDate(highScore.date)}</Text>
+              </View>
+            ))}
+          </>
+        )}
       </View>
       <View style={styles.gridSizeSelector}>
         <TouchableOpacity
           onPress={() => changeGridSize('left')}
-          style={[
-            styles.iconWrapper,
-            gridSize <= 6 && styles.hiddenIcon,
-          ]}
+          style={[styles.iconWrapper, gridSize <= 6 && !showAIRecords && styles.hiddenIcon]}
         >
           <Icon name="caret-left" size={30} color="#FFD700" />
         </TouchableOpacity>
-        <Text style={styles.gridSizeText}>{gridSize} x {gridSize}</Text>
+        <Text style={styles.gridSizeText}>
+          {gridSize === 15 && showAIRecords ? 'Records vs IA' : `${gridSize} x ${gridSize}`}
+        </Text>
         <TouchableOpacity
           onPress={() => changeGridSize('right')}
-          style={[
-            styles.iconWrapper,
-            gridSize >= 15 && styles.hiddenIcon,
-          ]}
+          style={[styles.iconWrapper, gridSize === 15 && showAIRecords && styles.hiddenIcon]}
         >
           <Icon name="caret-right" size={30} color="#FFD700" />
         </TouchableOpacity>
@@ -101,20 +134,20 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 20,
-    backgroundColor: '#121212', // Fondo oscuro
+    backgroundColor: '#121212',
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#121212', // Fondo oscuro para la pantalla de carga
+    backgroundColor: '#121212',
   },
   loadingText: {
     fontSize: 16,
-    color: '#FFD700', // Texto dorado oscuro
+    color: '#FFD700',
   },
   scoresContainer: {
-    width: '100%',
+    width: '90%',
     alignItems: 'center',
   },
   subtitle: {
@@ -123,7 +156,7 @@ const styles = StyleSheet.create({
     marginTop: 30,
     marginBottom: 30,
     textAlign: 'center',
-    color: '#FFD700', // Texto dorado oscuro
+    color: '#FFD700',
   },
   gridSizeSelector: {
     flexDirection: 'row',
@@ -134,7 +167,7 @@ const styles = StyleSheet.create({
   gridSizeText: {
     fontSize: 24,
     marginHorizontal: 20,
-    color: '#FFD700', // Texto dorado oscuro
+    color: '#FFD700',
   },
   row: {
     flexDirection: 'row',
@@ -145,8 +178,8 @@ const styles = StyleSheet.create({
   cell: {
     width: '25%',
     textAlign: 'center',
-    fontSize: 16,
-    color: '#FFD700', // Texto dorado oscuro
+    fontSize: 13,
+    color: '#FFD700',
   },
   iconWrapper: {
     width: 50,
@@ -154,7 +187,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#333333', // Fondo más oscuro para los iconos
+    backgroundColor: '#333333',
     marginHorizontal: 10,
   },
   hiddenIcon: {
