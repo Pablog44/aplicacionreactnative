@@ -264,8 +264,8 @@ export default function SnakeGame() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.gameOverText}>{isGameOver ? 'Game Over' : ''}</Text>
-      <Text style={styles.scoreText}>Player: {score} | AI: {aiScore}</Text>
+      <Text style={styles.gameOverText}>{isGameOver ? 'Vs la IA' : ''}</Text>
+      <Text style={styles.scoreText}>Jugador: {score} | IA: {aiScore}</Text>
       <View style={[styles.grid, { width: gridSize * CELL_SIZE, height: gridSize * CELL_SIZE }]}>
         {Array.from({ length: gridSize * gridSize }).map((_, index) => {
           const x = index % gridSize;

@@ -122,7 +122,7 @@ export default function ExploreScreen() {
           </>
         ) : (
           <>
-            <Text style={styles.subtitle}>Top Scores for {gridSize} x {gridSize}:</Text>
+            <Text style={styles.subtitle}>Top puntuaciones para {gridSize} x {gridSize}:</Text>
             {highScores.map((highScore, index) => (
               <View key={index} style={styles.row}>
                 <Text style={styles.cell}>{index + 1}º</Text>

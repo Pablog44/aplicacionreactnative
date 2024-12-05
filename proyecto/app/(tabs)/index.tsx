@@ -228,9 +228,9 @@ export default function SnakeGame() {
         {(!gameStarted || isGameOver) && (
           <>
             <Text style={styles.gameOverText}>
-              {isGameOver ? "Game Over" : "Snake Game"}
+              {isGameOver ? "Game Over" : "Juega"}
             </Text>
-            <Text style={styles.scoreText}>Score: {score}</Text>
+            <Text style={styles.scoreText}>Puntuación: {score}</Text>
           </>
         )}
       </View>
